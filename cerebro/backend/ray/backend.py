@@ -19,6 +19,10 @@ class RayBackend(Backend):
     def __init__(self, num_workers = None, start_timeout = 600, num_data_readers = 10, verbose = 1, 
                 data_readers_pool_type = 'thread', ):
 
+        # Putting ray.init() here, hoping it will not go out of scope once the __init__ function exits, but only when the
+        # class is destroyed. This may not be true, and may have to invoke ray.init() globally somehow.
+        ray.init()
+
         tmout = timeout.Timeout(start_timeout,
                                 message='Timed out waiting for {activity}. Please check that you have '
                                         'enough resources to run all Cerebro processes. Each Cerebro '
@@ -51,7 +55,7 @@ class RayBackend(Backend):
         self.settings = settings
 
         self.workers_initialized = False
-        self.task_clients = None
+        self.workers = None
         self.data_loaders_initialized = False
         
         # May not need the below attributes, remove if not needed for Ray
@@ -65,13 +69,29 @@ class RayBackend(Backend):
         return self.settings.num_workers
 
     def initialize_workers(self):
-        pass
+
+        num_workers = self._num_workers()
+        self.workers = [Worker.options(name=str(i), lifetime = "detached").remote() for i in range(num_workers)]
+        self.workers_initialized = True
 
     def initialize_data_loaders(self, store, schema_fields):
         pass
 
     def teardown_workers(self):
-        pass
+        
+        # Consider, instead of forcefully killing it, to remove the detached lifetime and set it to null.
+        # Hence, when all references to actor handle are removed, it is automatically garbage collected
+        # and the process is stopped.
+        for worker in self.workers:
+            ray.kill(worker)
+
+        self.workers = None
+        self.workers_initialized = False
+        self.data_loaders_initialized = False
+
+        # Consider explicitly shutting down ray here, but before that make sure that all data is 
+        # written to persistent storage
+        # ray.shutdown()
 
     def prepare_data(self, store, dataset, validation, compress_sparse=False, verbose=2):
         pass
@@ -82,7 +102,13 @@ class RayBackend(Backend):
     def train_for_one_epoch(self, models, store, feature_col, label_col, is_train=True):
         pass
 
+# Not specifying the number of CPUs in ray.remote (@ray.remote(num_cpus=1)) as we are doing a single core computation right now.
+# But may see if we want to specify it later or we dont want to keep it that dynamic. Also find a way to dynamically provide 
+# resources (num_cpus = 1 OR num_gpus = 1)
 @ray.remote
 class Worker(object):
     def __init__(self):
+        pass
+
+    def train(self, data_shard, model):
         pass
