@@ -13,3 +13,4 @@ pip3 install cython
 git clone https://github.com/Abhishek2304/cerebro-system.git && cd cerebro-system && make
 
 pip3 install -U 'ray[default]'
+pip3 install ray[data]
