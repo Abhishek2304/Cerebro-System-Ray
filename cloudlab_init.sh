@@ -1,9 +1,11 @@
-sudo apt install python3-venv
-sudo apt install python3-dev
+sudo apt-get update
+sudo apt-get -y upgrade
+sudo apt-get -y install python3-venv
+sudo apt-get -y install python3-dev
 
 mkdir project
 cd project
-python3-m venv env_cerebro
+python3 -m venv env_cerebro
 source env_cerebro/bin/activate
 
 pip3 install --upgrade pip
