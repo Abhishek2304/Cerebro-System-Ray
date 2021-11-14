@@ -79,9 +79,6 @@ class RayBackend(Backend):
         self.val_shards = None
         
         # May not need the below attributes, remove if not needed for Ray
-        self.driver = None
-        self.driver_client = None
-        self.spark_job_group = None
         self.rand = np.random.RandomState(constants.RANDOM_SEED)
 
         # Check this again, since these initializations are never called.
@@ -97,16 +94,16 @@ class RayBackend(Backend):
         self.workers = [Worker.options(lifetime = "detached").remote(i) for i in range(num_workers)]
         self.workers_initialized = True
 
-    def initialize_data_loaders(self, store, schema_fields):
+    def initialize_data_loaders(self, store, schema_Fields = None, dataset_idx = None):
         ### Assume data is in parquet format in train/val_data_path Initialize data loaders to read this parquet format and shard automatically
 
         if self.workers_initialized:
             shard_count = self._num_workers()
 
-            train_dataset = ray.data.read_parquet(store.get_train_data_path) # Figure out the index that needs to be passed, check if you
+            train_dataset = ray.data.read_parquet(store.get_train_data_path(dataset_idx)) # Figure out the index that needs to be passed, check if you
             # can load the entire table at once instead of index wise
             self.train_shards = train_dataset.split(n=shard_count, locality_hints = self.workers)
-            val_dataset = ray.data.read_parquet(store.get_val_data_path) # Figure out the index that needs to be passed, check if you can
+            val_dataset = ray.data.read_parquet(store.get_val_data_path(dataset_idx)) # Figure out the index that needs to be passed, check if you can
             # load the entire table at once instead of index wise
             self.val_shards = val_dataset.split(n=shard_count, locality_hints = self.workers)
 
@@ -127,6 +124,7 @@ class RayBackend(Backend):
         # Consider explicitly shutting down ray here, but before that make sure that all data is 
         # written to persistent storage
         # ray.shutdown()
+        raise NotImplementedError()
 
     def prepare_data(self, store, dataset, validation, num_partitions=None, parquet_row_group_size_mb=8, dataset_idx=None):
         # IMP - Takes the number of partitions as equal to the number of workers here. DOES NOT USE THE num_partitions SUPPLIED.
@@ -134,8 +132,9 @@ class RayBackend(Backend):
                             num_partitions=self._num_workers(), dataset_idx=dataset_idx, 
                             parquet_row_group_size_mb = parquet_row_group_size_mb, verbose = self.settings.verbose)
 
-    def get_metadata_from_parquet(self, store, label_columns=['label'], feature_columns=['features']):
-        raise NotImplementedError()
+    def get_metadata_from_parquet(self, store, label_columns=['label'], feature_columns=['features'], dataset_idx = None):
+        
+        return util.get_simple_meta_from_parquet(store, label_columns + feature_columns, dataset_idx = dataset_idx)
 
     def train_for_one_epoch(self, models, store, feature_col, label_col, is_train=True):
         

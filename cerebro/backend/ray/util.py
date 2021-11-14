@@ -7,6 +7,32 @@ import pandas as pd
 
 from .. import constants
 
+def get_simple_meta_from_parquet(store, schema_cols, dataset_idx=None):
+    # We dont get avg_row size as its not needed for Ray. Thus, return None for that always.
+
+    train_data_path = store.get_train_data_path(dataset_idx)
+    validation_data_path = store.get_val_data_path(dataset_idx)
+
+    if not store.exists(train_data_path):
+        raise ValueError("{} path does not exist in the store".format(train_data_path))
+
+    train_df = pd.read_parquet(train_data_path)
+    train_rows = len(train_df)
+
+    val_rows = 0
+    if store.exists(validation_data_path):
+        val_df = pd.read_parquet(validation_data_path)
+        val_rows = len(val_df)
+
+    metadata = {}
+    for col in train_df.columns:
+        col_info = {'dtype': train_df.dtypes[col].name, 'size': len(train_df[col])}
+        metadata[col] = col_info
+
+    avg_row_size = None
+
+    return train_rows, val_rows, metadata, avg_row_size
+
 def _train_val_split(df, validation):
     
     validation_ratio = 0.0
@@ -20,7 +46,7 @@ def _train_val_split(df, validation):
     elif isinstance(validation, str):
         dtype = df.dtypes['validation']
         
-        bool_dtype = (df.a.dtypes.name == 'bool')
+        bool_dtype = (dtype == 'bool')
         if bool_dtype:
             val_df = (df[df['validation']==True]).drop(columns = ['validation'])
             train_df = (df[df['validation']==False]).drop(columns = ['validation'])
@@ -29,8 +55,6 @@ def _train_val_split(df, validation):
             val_df = (df[df['validation']>0]).drop(columns = ['validation'])
             train_df = (df[df['validation']==0]).drop(columns = ['validation'])
 
-        # Approximate ratio of validation data to training data for proportionate scale
-        # of partitions
         train_rows = len(train_df)
         val_rows = len(val_df)
         validation_ratio = val_rows / (val_rows + train_rows)
@@ -42,6 +66,8 @@ def _train_val_split(df, validation):
 
 def _create_dataset(store, df, validation, compress_sparse,
                     num_partitions, num_workers, dataset_idx, parquet_row_group_size_mb, verbose):
+    # We dont get avg_row size as its not needed for ray. Thus, return None for that always.
+
     train_data_path = store.get_train_data_path(dataset_idx)
     val_data_path = store.get_val_data_path(dataset_idx)
     if verbose >= 1:
@@ -63,8 +89,29 @@ def _create_dataset(store, df, validation, compress_sparse,
     if val_df:
         val_df.to_parquet(val_data_path, compression = None, index = False)
 
-    # Implement get simple metadata from parquet, return those values here.
-    return
+    train_rows = len(train_df)
+    val_rows = len(val_df)
+
+    metadata = {}
+    for col in train_df.columns:
+        col_info = {'dtype': train_df.dtypes[col].name, 'size': len(train_df[col])}
+        metadata[col] = col_info
+
+    avg_row_size = None
+
+    if verbose:
+        print(
+        'CEREBRO => Time: {}, Train Rows: {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), train_rows))
+    if val_df:
+        if val_rows == 0:
+            raise ValueError(
+                'Validation DataFrame does not any samples with validation param {}'
+                    .format(validation))
+        if verbose:
+            print(
+            'CEREBRO => Time: {}, Val Rows: {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), val_rows))
+
+    return train_rows, val_rows, metadata, avg_row_size
 
     
 
