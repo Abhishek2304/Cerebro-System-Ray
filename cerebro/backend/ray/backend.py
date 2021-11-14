@@ -85,8 +85,8 @@ class RayBackend(Backend):
         self.rand = np.random.RandomState(constants.RANDOM_SEED)
 
         # Check this again, since these initializations are never called.
-        self.initialize_workers()
-        self.initialize_data_loaders() # Need to provide the store to initialize_data_loaders()
+        # self.initialize_workers()
+        # self.initialize_data_loaders() # Need to provide the store to initialize_data_loaders()
 
     def _num_workers(self):
         return self.settings.num_workers
@@ -128,11 +128,14 @@ class RayBackend(Backend):
         # written to persistent storage
         # ray.shutdown()
 
-    def prepare_data(self, store, dataset, validation, compress_sparse=False, verbose=2):
-        pass
+    def prepare_data(self, store, dataset, validation, num_partitions=None, parquet_row_group_size_mb=8, dataset_idx=None):
+        # IMP - Takes the number of partitions as equal to the number of workers here. DOES NOT USE THE num_partitions SUPPLIED.
+        return util.prepare_data(self._num_workers(), store, dataset, validation, 
+                            num_partitions=self._num_workers(), dataset_idx=dataset_idx, 
+                            parquet_row_group_size_mb = parquet_row_group_size_mb, verbose = self.settings.verbose)
 
     def get_metadata_from_parquet(self, store, label_columns=['label'], feature_columns=['features']):
-        pass
+        raise NotImplementedError()
 
     def train_for_one_epoch(self, models, store, feature_col, label_col, is_train=True):
         
