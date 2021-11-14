@@ -141,6 +141,25 @@ class RayBackend(Backend):
             mode = "Validation"
         if self.settings.verbose >= 1:
             print('CEREBRO => Time: {}, Starting EPOCH {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), mode))
+        
+        sub_epoch_trainers = []
+        for model in models:
+            if type(store) == dict:
+                a_store = store[model.getRunId()]
+            else:
+                a_store = store
+            
+            if type(feature_cols) == dict:
+                a_feature_col = feature_cols[model.getRunId()]
+            else:
+                a_feature_col = feature_cols
+            
+            if type(label_cols) == dict:
+                a_label_col = label_cols[model.getRunId()]
+            else:
+                a_label_col = label_cols
+            
+            sub_epoch_trainers.append(_get_remote_trainer(model, self, a_store, None, a_feature_col, a_label_col, is_train, self.settings.verbose))
 
         Q = [(i, j) for i in range(len(models)) for j in range(self.settings.num_workers)]
         random.shuffle(Q)
@@ -153,10 +172,6 @@ class RayBackend(Backend):
 
         worker_idle = [True for _ in range(self.settings.num_workers)]
         model_on_worker = [-1 for _ in range(self.settings.num_workers)]
-
-        # Check these, may not need them.
-        model_results = {model.getRunId(): None for model in models}
-        model_sub_epoch_steps = {model.getRunId(): None for model in models}
 
         def place_model_on_worker(j):
             random.shuffle(Q)
@@ -186,27 +201,3 @@ class RayBackend(Backend):
 
 def initial_weights(model):
     return None
-        pass
-
-# Not specifying the number of CPUs in ray.remote (@ray.remote(num_cpus=1)) as we are doing a single core computation right now.
-# But may see if we want to specify it later or we dont want to keep it that dynamic. Also find a way to dynamically provide 
-# resources (num_cpus = 1 OR num_gpus = 1)
-@ray.remote
-class Worker(object):
-    def __init__(self, rank):
-        # Need to turn this into an entire dictionary documenting the errors, etc.
-        self.sub_epoch_completed = False
-
-    def sub_epoch_completed(self):
-        return self.sub_epoch_completed
-
-    def sub_epoch_train(self, data_shard, model):
-        self.sub_epoch_completed = False
-        
-        ## Do the entire training here
-
-        self.sub_epoch_completed = True
-
-def _get_runnable_model():
-
-    # Later, after implementing keras, need to implement check params in model using feature columns, etc.
