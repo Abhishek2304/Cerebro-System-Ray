@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import random
 import numpy as np
 import tensorflow as tf
 import datetime
@@ -13,6 +14,22 @@ from ...commons.constants import exit_event
 import ray
 import psutil
 
+# Not specifying the number of CPUs in ray.remote (@ray.remote(num_cpus=1)) as we are doing a single core computation right now.
+# But may see if we want to specify it later or we dont want to keep it that dynamic. Also find a way to dynamically provide 
+# resources (num_cpus = 1 OR num_gpus = 1)
+@ray.remote
+class Worker(object):
+    def __init__(self):
+        self.completion_status = True
+
+    def get_completion_status(self):
+        return self.completion_status
+    
+    def train_subepoch(self, model, weights):
+        self.completion_status = False
+        print(model, weights)
+        self.completion_status = True
+        return weights
 
 class RayBackend(Backend):
 
@@ -65,7 +82,6 @@ class RayBackend(Backend):
         self.rand = np.random.RandomState(constants.RANDOM_SEED)
 
     def _num_workers(self):
-        
         return self.settings.num_workers
 
     def initialize_workers(self):
@@ -100,15 +116,40 @@ class RayBackend(Backend):
         pass
 
     def train_for_one_epoch(self, models, store, feature_col, label_col, is_train=True):
-        pass
+        Q = [(i, j) for i in range(len(models)) for j in range(self.settings.num_workers)]
+        random.shuffle(Q)
+        
+        model_idle = [True for _ in range(len(models))]
+        model_weights = [initial_weights(model) for model in models]
 
-# Not specifying the number of CPUs in ray.remote (@ray.remote(num_cpus=1)) as we are doing a single core computation right now.
-# But may see if we want to specify it later or we dont want to keep it that dynamic. Also find a way to dynamically provide 
-# resources (num_cpus = 1 OR num_gpus = 1)
-@ray.remote
-class Worker(object):
-    def __init__(self):
-        pass
+        worker_idle = [True for _ in range(self.settings.num_workers)]
+        model_on_worker = [-1 for _ in range(self.settings.num_workers)]
 
-    def train(self, data_shard, model):
-        pass
+        def place_model_on_worker(j):
+            random.shuffle(Q)
+            for idx, s in enumerate(Q):
+                i, j_prime = s
+                if j_prime == j and model_idle[i]:
+                    model_idle[i] = False
+                    worker_idle[j] = False
+                    model_on_worker[j] = i
+                    model_weights[i] = self.workers[j].train_subepoch.remote(models[i], model_weights[i])
+                    break
+
+        while not exit_event.is_set() and len(Q) > 0:
+            for j in range(self.settings.num_workers):
+                if worker_idle[j]:
+                    place_model_on_worker(j)
+                elif ray.get(self.workers[j].get_completion_status.remote()):
+                    i = model_on_worker[j]
+                    Q.remove((i, j))
+                    model_idle[i] = True
+                    model_weights[i] = ray.get(model_weights[i])
+                    worker_idle[j] = True
+                    model_on_worker[j] = -1
+                    place_model_on_worker(j)
+                
+            exit_event.wait(self.settings.polling_period)
+
+def initial_weights(model):
+    return None
