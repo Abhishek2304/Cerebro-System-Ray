@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 import datetime
 
-from . import service_driver, service_task, util
+from . import util
 from .. import constants
 from .. import timeout, settings as ray_settings, secret, host_hash, job_id
 from ..backend import Backend
@@ -118,17 +118,12 @@ class RayBackend(Backend):
                             'first!')
 
     def teardown_workers(self):
+        # Need to reimplement, probably not related to killing of the workers.
         
         # Consider, instead of forcefully killing it, to remove the detached lifetime and set it to null.
         # Hence, when all references to actor handle are removed, it is automatically garbage collected
         # and the process is stopped.
-        for worker in self.workers:
-            ray.kill(worker)
-
-        self.workers = None
-        self.workers_initialized = False
-        self.data_loaders_initialized = False
-
+        
         # Consider explicitly shutting down ray here, but before that make sure that all data is 
         # written to persistent storage
         # ray.shutdown()
@@ -140,14 +135,28 @@ class RayBackend(Backend):
         pass
 
     def train_for_one_epoch(self, models, store, feature_col, label_col, is_train=True):
+        
+        mode = "Training"
+        if not is_train:
+            mode = "Validation"
+        if self.settings.verbose >= 1:
+            print('CEREBRO => Time: {}, Starting EPOCH {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), mode))
+
         Q = [(i, j) for i in range(len(models)) for j in range(self.settings.num_workers)]
         random.shuffle(Q)
+
+        # Implement the store here
+        # Need to use a _get_remote_trainer function to initially checkpoint and put model in store, etc.
         
         model_idle = [True for _ in range(len(models))]
         model_weights = [initial_weights(model) for model in models]
 
         worker_idle = [True for _ in range(self.settings.num_workers)]
         model_on_worker = [-1 for _ in range(self.settings.num_workers)]
+
+        # Check these, may not need them.
+        model_results = {model.getRunId(): None for model in models}
+        model_sub_epoch_steps = {model.getRunId(): None for model in models}
 
         def place_model_on_worker(j):
             random.shuffle(Q)
@@ -157,7 +166,7 @@ class RayBackend(Backend):
                     model_idle[i] = False
                     worker_idle[j] = False
                     model_on_worker[j] = i
-                    model_weights[i] = self.workers[j].train_subepoch.remote(models[i], model_weights[i])
+                    model_weights[i] = self.workers[j].sub_epoch_train.remote(models[i], model_weights[i])
                     break
 
         while not exit_event.is_set() and len(Q) > 0:
@@ -185,7 +194,19 @@ def initial_weights(model):
 @ray.remote
 class Worker(object):
     def __init__(self, rank):
-        pass
+        # Need to turn this into an entire dictionary documenting the errors, etc.
+        self.sub_epoch_completed = False
+
+    def sub_epoch_completed(self):
+        return self.sub_epoch_completed
 
     def sub_epoch_train(self, data_shard, model):
-        pass
+        self.sub_epoch_completed = False
+        
+        ## Do the entire training here
+
+        self.sub_epoch_completed = True
+
+def _get_runnable_model():
+
+    # Later, after implementing keras, need to implement check params in model using feature columns, etc.

@@ -256,7 +256,7 @@ class SparkEstimator(PySparkEstimator, SparkEstimatorParams, SparkEstimatorParam
     def setCustomObjects(self, value):
         return self._set(custom_objects=value)
 
-    def getCustomObjects(self):
+    def CustomObjects(self):
         return self.getOrDefault(self.custom_objects)
 
     def _check_metadata_compatibility(self, metadata):
