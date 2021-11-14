@@ -13,6 +13,7 @@ from ...commons.constants import exit_event
 
 import ray
 import psutil
+import pandas as pd
 
 # Not specifying the number of CPUs in ray.remote (@ray.remote(num_cpus=1)) as we are doing a single core computation right now.
 # But may see if we want to specify it later or we dont want to keep it that dynamic. Also find a way to dynamically provide 
@@ -74,6 +75,8 @@ class RayBackend(Backend):
         self.workers_initialized = False
         self.workers = None
         self.data_loaders_initialized = False
+        self.train_shards = None
+        self.val_shards = None
         
         # May not need the below attributes, remove if not needed for Ray
         self.driver = None
@@ -81,17 +84,38 @@ class RayBackend(Backend):
         self.spark_job_group = None
         self.rand = np.random.RandomState(constants.RANDOM_SEED)
 
+        # Check this again, since these initializations are never called.
+        self.initialize_workers()
+        self.initialize_data_loaders() # Need to provide the store to initialize_data_loaders()
+
     def _num_workers(self):
         return self.settings.num_workers
 
     def initialize_workers(self):
 
         num_workers = self._num_workers()
-        self.workers = [Worker.options(name=str(i), lifetime = "detached").remote() for i in range(num_workers)]
+        self.workers = [Worker.options(lifetime = "detached").remote(i) for i in range(num_workers)]
         self.workers_initialized = True
 
     def initialize_data_loaders(self, store, schema_fields):
-        pass
+        ### Assume data is in parquet format in train/val_data_path Initialize data loaders to read this parquet format and shard automatically
+
+        if self.workers_initialized:
+            shard_count = self._num_workers()
+
+            train_dataset = ray.data.read_parquet(store.get_train_data_path) # Figure out the index that needs to be passed, check if you
+            # can load the entire table at once instead of index wise
+            self.train_shards = train_dataset.split(n=shard_count, locality_hints = self.workers)
+            val_dataset = ray.data.read_parquet(store.get_val_data_path) # Figure out the index that needs to be passed, check if you can
+            # load the entire table at once instead of index wise
+            self.val_shards = val_dataset.split(n=shard_count, locality_hints = self.workers)
+
+            self.data_loaders_initialized = True
+            
+            
+        else:
+            raise Exception('Spark tasks not initialized for Cerebro. Please run SparkBackend.initialize_workers() '
+                            'first!')
 
     def teardown_workers(self):
         
@@ -153,3 +177,15 @@ class RayBackend(Backend):
 
 def initial_weights(model):
     return None
+        pass
+
+# Not specifying the number of CPUs in ray.remote (@ray.remote(num_cpus=1)) as we are doing a single core computation right now.
+# But may see if we want to specify it later or we dont want to keep it that dynamic. Also find a way to dynamically provide 
+# resources (num_cpus = 1 OR num_gpus = 1)
+@ray.remote
+class Worker(object):
+    def __init__(self, rank):
+        pass
+
+    def sub_epoch_train(self, data_shard, model):
+        pass
