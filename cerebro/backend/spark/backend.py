@@ -324,6 +324,7 @@ class SparkBackend(Backend):
         """
         return util.prepare_data(self._num_workers(), store, dataset, validation,
                                  num_partitions=num_partitions, dataset_idx=dataset_idx,
+                                 compress_sparse = False,
                                  parquet_row_group_size_mb=parquet_row_group_size_mb, verbose=self.settings.verbose)
 
     def _num_workers(self):
