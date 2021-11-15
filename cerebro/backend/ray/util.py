@@ -86,7 +86,7 @@ def _create_dataset(store, df, validation, compress_sparse,
     train_df, val_df, validation_ratio = _train_val_split(df, validation)
 
     train_df.to_parquet(train_data_path, compression = None, index = False)
-    if val_df:
+    if val_df is not None:
         val_df.to_parquet(val_data_path, compression = None, index = False)
 
     train_rows = len(train_df)
@@ -102,7 +102,7 @@ def _create_dataset(store, df, validation, compress_sparse,
     if verbose:
         print(
         'CEREBRO => Time: {}, Train Rows: {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), train_rows))
-    if val_df:
+    if val_df is not None:
         if val_rows == 0:
             raise ValueError(
                 'Validation DataFrame does not any samples with validation param {}'
