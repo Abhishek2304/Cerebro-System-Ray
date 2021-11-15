@@ -42,7 +42,8 @@ def main():
 
     train_rows, val_rows, metadata, _ = backend.prepare_data(store, df, 0.2)
     backend.initialize_data_loaders(store)
-    print("Initialization done")
+    print("Initialization done, now sleeping")
+    time.sleep(100000)
     backend.teardown_workers()
 
 if __name__ == "__main__":
