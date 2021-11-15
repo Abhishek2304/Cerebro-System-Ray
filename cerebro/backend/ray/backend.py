@@ -45,7 +45,7 @@ class RayBackend(Backend):
 
         # Putting ray.init() here, hoping it will not go out of scope once the __init__ function exits, but only when the
         # class is destroyed. This may not be true, and may have to invoke ray.init() globally somehow.
-        ray.init(address = "auto", namespace="exp1")
+        ray.init(address = "auto")
 
         tmout = timeout.Timeout(start_timeout,
                                 message='Timed out waiting for {activity}. Please check that you have '
