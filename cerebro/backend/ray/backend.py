@@ -123,8 +123,7 @@ class RayBackend(Backend):
 
         # Simply shutting down ray right now, may have to do more later
         ray.shutdown()
-        
-        
+
     def prepare_data(self, store, dataset, validation, num_partitions=None, parquet_row_group_size_mb=8, dataset_idx=None):
 
         # IMP - Takes the number of partitions as equal to the number of workers here. DOES NOT USE THE num_partitions SUPPLIED.
