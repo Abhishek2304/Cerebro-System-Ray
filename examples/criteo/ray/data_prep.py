@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
+import time
 
 from cerebro.backend.ray.backend import RayBackend
 from cerebro.storage import LocalStore
@@ -35,13 +36,13 @@ def main():
     print("SAMPLING")
     df = df.sample(frac = 0.1)
 
-    print(df.head())
-    print()
-    print(df.columns)
-    print()
-    print(df.dtypes)
-    print()
-    print(len(df))
+    backend = RayBackend(num_workers = 4)
+    store = LocalStore(OUTPUT_PATH, train_path=os.path.join(OUTPUT_PATH, 'train_data'), val_path=os.path.join(OUTPUT_PATH, 'val_data'))
+
+    train_rows, val_rows, metadata, _ = backend.prepare_data(store, df, 0.2)
+    backend.initialize_data_loaders(store)
+    print("Initialization done")
+    backend.teardown_workers()
 
 if __name__ == "__main__":
     main()

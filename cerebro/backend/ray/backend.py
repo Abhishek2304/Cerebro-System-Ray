@@ -34,7 +34,7 @@ class Worker(object):
 
 class RayBackend(Backend):
 
-    def __init__(self, num_workers = None, start_timeout = 600, num_data_readers = 10, verbose = 1, 
+    def __init__(self, num_workers = None, start_timeout = 600, verbose = 1, 
                 data_readers_pool_type = 'thread'):
 
         # Putting ray.init() here, hoping it will not go out of scope once the __init__ function exits, but only when the
@@ -74,6 +74,8 @@ class RayBackend(Backend):
         self.data_loaders_initialized = False
         self.train_shards = None
         self.val_shards = None
+
+        # Add self.num_data_readers if it is different from num_workers
         
         # May not need the below attributes, remove if not needed for Ray
         self.rand = np.random.RandomState(constants.RANDOM_SEED)
