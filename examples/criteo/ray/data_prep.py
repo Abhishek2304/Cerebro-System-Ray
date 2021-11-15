@@ -11,7 +11,7 @@ random.seed(2021)
 
 def main():
 
-    data_dir = "/proj/orion-PG0/rayCriteoDataset/valid_0.tsv"
+    data_dir = "/proj/orion-PG0/rayCriteoDataset/train_0.tsv"
     OUTPUT_PATH = "/proj/orion-PG0/rayCriteoDataset/"
     TRAIN_FRACTION = 0.7
 
