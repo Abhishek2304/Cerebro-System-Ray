@@ -102,7 +102,7 @@ class RayBackend(Backend):
 
         if self.workers_initialized:
             shard_count = self._num_workers()
-            train_dataset = ray.data.read_csv('/proj/orion-PG0/rayCriteoDataset/train_0.tsv', arrow_csv_args={'parse_options':
+            train_dataset = ray.data.read_csv('/proj/orion-PG0/rayCriteoDataset/train_0.tsv', parse_options =
                                                 csv.ParseOptions(delimiter="\t")}) 
             # train_dataset = ray.data.read_parquet(store.get_train_data_path(dataset_idx)) 
             print(train_dataset)
