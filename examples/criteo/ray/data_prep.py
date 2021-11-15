@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from cerebro.backend import RayBackend
+from cerebro.backend.ray.backend import RayBackend
 from cerebro.storage import LocalStore
 
 import random
