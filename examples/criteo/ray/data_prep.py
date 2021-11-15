@@ -58,7 +58,8 @@ def main():
     print()
 
     for shard, worker in zip(backend.train_shards, backend.workers):
-        worker.testing_function.remote(shard)
+        ref = worker.testing_function.remote(shard)
+        print(ray.get(ref))
     backend.teardown_workers()
 
 if __name__ == "__main__":
