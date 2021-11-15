@@ -20,5 +20,7 @@ This module contains different execution backends for Cerebro.
 """
 
 from .spark.backend import SparkBackend
+from .ray.backend import RayBackend
 
 SparkBackend.__module__ = "cerebro.backend"
+RayBackend.__module__ = "cerebro.backend"

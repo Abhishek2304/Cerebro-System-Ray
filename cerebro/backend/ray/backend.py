@@ -35,7 +35,7 @@ class Worker(object):
 class RayBackend(Backend):
 
     def __init__(self, num_workers = None, start_timeout = 600, num_data_readers = 10, verbose = 1, 
-                data_readers_pool_type = 'thread', ):
+                data_readers_pool_type = 'thread'):
 
         # Putting ray.init() here, hoping it will not go out of scope once the __init__ function exits, but only when the
         # class is destroyed. This may not be true, and may have to invoke ray.init() globally somehow.
