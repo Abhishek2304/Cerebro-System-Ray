@@ -55,9 +55,6 @@ class RayBackend(Backend):
                                         disk_cache_size_bytes = None,
                                         data_readers_pool_type = data_readers_pool_type,
                                         nics = None) 
-
-        # Spark defines the spark context here, to specify the connection to the spark cluster. Can consider doing ray init here,
-        # but need to make sure __init__ will not go out of scope or Ray will be shut down.
         
         # If num_workers not given, use psutil to set the workers to cores - 1.
         if num_workers is None:
@@ -82,7 +79,7 @@ class RayBackend(Backend):
         self.rand = np.random.RandomState(constants.RANDOM_SEED)
 
         # Check this again, since these initializations are never called.
-        # self.initialize_workers()
+        self.initialize_workers()
         # self.initialize_data_loaders() # Need to provide the store to initialize_data_loaders()
 
     def _num_workers(self):
@@ -123,8 +120,9 @@ class RayBackend(Backend):
         
         # Consider explicitly shutting down ray here, but before that make sure that all data is 
         # written to persistent storage
-        # ray.shutdown()
-        raise NotImplementedError()
+        ray.shutdown()
+        
+        # Simply shutting down ray right now, may have to do more later
 
     def prepare_data(self, store, dataset, validation, num_partitions=None, parquet_row_group_size_mb=8, dataset_idx=None):
         # IMP - Takes the number of partitions as equal to the number of workers here. DOES NOT USE THE num_partitions SUPPLIED.
