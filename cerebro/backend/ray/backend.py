@@ -14,6 +14,7 @@ from ...commons.constants import exit_event
 import ray
 import psutil
 import pandas as pd
+import pyarrow.csv as csv
 
 # Not specifying the number of CPUs in ray.remote (@ray.remote(num_cpus=1)) as we are doing a single core computation right now.
 # But may see if we want to specify it later or we dont want to keep it that dynamic. Also find a way to dynamically provide 
@@ -101,16 +102,18 @@ class RayBackend(Backend):
 
         if self.workers_initialized:
             shard_count = self._num_workers()
-            train_dataset = ray.data.read_parquet(store.get_train_data_path(dataset_idx)) 
+            train_dataset = ray.data.read_csv('/proj/orion-PG0/rayCriteoDataset/train_0.tsv', arrow_csv_args={'parse_options':
+                                                csv.ParseOptions(delimiter="\t")}) 
+            # train_dataset = ray.data.read_parquet(store.get_train_data_path(dataset_idx)) 
             print(train_dataset)
             self.train_shards = train_dataset.split(n=shard_count, locality_hints = self.workers)
             print()
-            print(self.train_shards)
-            val_dataset = ray.data.read_parquet(store.get_val_data_path(dataset_idx)) 
-            print()
-            print(val_dataset)
-            self.val_shards = val_dataset.split(n=shard_count, locality_hints = self.workers)
-            print(self.val_shards)
+            # print(self.train_shards)
+            # val_dataset = ray.data.read_parquet(store.get_val_data_path(dataset_idx)) 
+            # print()
+            # print(val_dataset)
+            # self.val_shards = val_dataset.split(n=shard_count, locality_hints = self.workers)
+            # print(self.val_shards)
 
             self.data_loaders_initialized = True
             
