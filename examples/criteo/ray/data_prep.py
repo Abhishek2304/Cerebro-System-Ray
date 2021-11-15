@@ -33,8 +33,8 @@ def main():
         df = df.drop(columns = [label])
     print("FILLING NAs")
     df.fillna(0, inplace=True)
-    print("SAMPLING")
-    df = df.sample(frac = 0.1)
+    # print("SAMPLING")
+    # df = df.sample(frac = 0.1)
 
     print("STARTING BACKEND NOW")
     backend = RayBackend(num_workers = 4)
