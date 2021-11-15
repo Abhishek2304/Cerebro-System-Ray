@@ -39,7 +39,7 @@ class RayBackend(Backend):
 
         # Putting ray.init() here, hoping it will not go out of scope once the __init__ function exits, but only when the
         # class is destroyed. This may not be true, and may have to invoke ray.init() globally somehow.
-        ray.init()
+        ray.init(namespace="exp1")
 
         tmout = timeout.Timeout(start_timeout,
                                 message='Timed out waiting for {activity}. Please check that you have '
@@ -98,7 +98,8 @@ class RayBackend(Backend):
 
         if self.workers_initialized:
             shard_count = self._num_workers()
-
+            print(store.get_train_data_path(dataset_idx))
+            raise NotImplementedError
             train_dataset = ray.data.read_parquet(store.get_train_data_path(dataset_idx)) # Figure out the index that needs to be passed, check if you
             # can load the entire table at once instead of index wise
             self.train_shards = train_dataset.split(n=shard_count, locality_hints = self.workers)
