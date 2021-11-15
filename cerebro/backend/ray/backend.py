@@ -34,7 +34,7 @@ class Worker(object):
         return weights
 
     def testing_function(self, data):
-        return data.show(5)
+        return data
 
 class RayBackend(Backend):
 
