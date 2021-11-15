@@ -124,6 +124,13 @@ class RayBackend(Backend):
         # Simply shutting down ray right now, may have to do more later
         ray.shutdown()
 
+    def prepare_data(self, store, dataset, validation, num_partitions=None, parquet_row_group_size_mb=8, dataset_idx=None):
+
+        # IMP - Takes the number of partitions as equal to the number of workers here. DOES NOT USE THE num_partitions SUPPLIED.
+        return util.prepare_data(self._num_workers(), store, dataset, validation, 
+                            num_partitions=self._num_workers(), dataset_idx=dataset_idx, 
+                            parquet_row_group_size_mb = parquet_row_group_size_mb, verbose = self.settings.verbose)
+                            
     def get_metadata_from_parquet(self, store, label_columns=['label'], feature_columns=['features'], dataset_idx = None):
         
         return util.get_simple_meta_from_parquet(store, label_columns + feature_columns, dataset_idx = dataset_idx)
