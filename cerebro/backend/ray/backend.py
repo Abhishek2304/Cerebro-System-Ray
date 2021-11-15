@@ -34,20 +34,12 @@ class Worker(object):
         self.completion_status = True
         return weights
 
-    def testing_function(self, data):
-        time.sleep(0.01)
-        return ray._private.services.get_node_ip_address()
-
-    def testing_function_2(self, data):
-        return data
-
 class RayBackend(Backend):
 
     def __init__(self, num_workers = None, start_timeout = 600, verbose = 1, 
                 data_readers_pool_type = 'thread'):
 
-        # Putting ray.init() here, hoping it will not go out of scope once the __init__ function exits, but only when the
-        # class is destroyed. This may not be true, and may have to invoke ray.init() globally somehow.
+        # First try to detect cluster and connect to it. Else, run plain ray.init() for a single node.
         try:
             ray.init(address = "auto")
             print("Running on a Ray Cluster")

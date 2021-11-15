@@ -27,17 +27,8 @@ def main():
         header_list.append(label)
 
     df = pd.read_csv(data_dir, sep = '\t', names = header_list, header = None)
-    #df = pd.read_csv(data_dir, sep = '\t')
+    # df = pd.read_csv(data_dir, sep = '\t')
     print("Reading Done")
-    # df.to_csv("/proj/orion-PG0/rayCriteoDataset/train_data.csv")
-    # print("Writing Done")
-
-    # df1 = pd.read_csv("/proj/orion-PG0/rayCriteoDataset/train_data.csv")
-    # print(df1.head())
-    # print(len(df1))
-
-    # df2 = ray.data.read_csv("/proj/orion-PG0/rayCriteoDataset/train_data.csv")
-    # print(df2.show(5))
 
     print("Removing categorical features for now")
     for i in range(26):
@@ -55,19 +46,6 @@ def main():
     train_rows, val_rows, metadata, _ = backend.prepare_data(store, df, 0.2)
     backend.initialize_data_loaders(store)
     print("Initialization done")
-    print()
-    i = 0
-    for shard, worker in zip(backend.train_shards, backend.workers):
-        ref = worker.testing_function.remote(shard)
-        ref2 = worker.testing_function_2.remote(shard)
-        print("worker:" + str(i))
-        print("IP Address of node: " + ray.get(ref))
-        data = ray.get(ref2)
-        print("Data info:")
-        print(data)
-        print(data.show(5))
-        print()
-        i += 1
     backend.teardown_workers()
 
 if __name__ == "__main__":
