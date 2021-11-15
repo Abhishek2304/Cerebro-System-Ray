@@ -36,6 +36,7 @@ def main():
     print("SAMPLING")
     df = df.sample(frac = 0.1)
 
+    print("STARTING BACKEND NOW")
     backend = RayBackend(num_workers = 4)
     store = LocalStore(OUTPUT_PATH, train_path=os.path.join(OUTPUT_PATH, 'train_data'), val_path=os.path.join(OUTPUT_PATH, 'val_data'))
 

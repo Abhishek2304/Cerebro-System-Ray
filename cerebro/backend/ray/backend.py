@@ -90,7 +90,7 @@ class RayBackend(Backend):
     def initialize_workers(self):
 
         num_workers = self._num_workers()
-        self.workers = [Worker.options(lifetime = "detached").remote(i) for i in range(num_workers)]
+        self.workers = [Worker.options(name = str(i), lifetime = "detached").remote() for i in range(num_workers)]
         self.workers_initialized = True
 
     def initialize_data_loaders(self, store, schema_Fields = None, dataset_idx = None):
