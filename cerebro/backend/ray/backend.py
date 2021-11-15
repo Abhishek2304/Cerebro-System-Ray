@@ -33,7 +33,7 @@ class Worker(object):
         self.completion_status = True
         return weights
 
-    def testing_function(data):
+    def testing_function(self, data):
         print(data.show(5))
         print()
 
