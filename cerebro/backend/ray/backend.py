@@ -34,7 +34,8 @@ class Worker(object):
         return weights
 
     def testing_function(self, data):
-        return data
+        time.sleep(0.01)
+        return ray._private.services.get_node_ip_address()
 
 class RayBackend(Backend):
 
@@ -43,7 +44,7 @@ class RayBackend(Backend):
 
         # Putting ray.init() here, hoping it will not go out of scope once the __init__ function exits, but only when the
         # class is destroyed. This may not be true, and may have to invoke ray.init() globally somehow.
-        ray.init(namespace="exp1")
+        ray.init(address = "auto", namespace="exp1")
 
         tmout = timeout.Timeout(start_timeout,
                                 message='Timed out waiting for {activity}. Please check that you have '

@@ -56,11 +56,13 @@ def main():
     backend.initialize_data_loaders(store)
     print("Initialization done")
     print()
-
+    i = 0
     for shard, worker in zip(backend.train_shards, backend.workers):
         ref = worker.testing_function.remote(shard)
+        print("worker:" + str(i))
         print(ray.get(ref))
         print()
+        i += 1
     backend.teardown_workers()
 
 if __name__ == "__main__":
