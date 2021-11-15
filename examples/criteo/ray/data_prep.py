@@ -26,7 +26,8 @@ def main():
     #     label = 'c' + str(i)
     #     header_list.append(label)
 
-    df = pd.read_csv(data_dir, sep = '\t', names = header_list, header = None)
+    # df = pd.read_csv(data_dir, sep = '\t', names = header_list, header = None)
+    df = pd.read_csv(data_dir, sep = '\t')
     print("Reading Done")
     df.to_csv("/proj/orion-PG0/rayCriteoDataset/train_data.csv")
     print("Writing Done")
