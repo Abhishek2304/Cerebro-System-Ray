@@ -112,7 +112,7 @@ class RayBackend(Backend):
             val_dataset = ray.data.read_parquet(store.get_val_data_path(dataset_idx)) 
             print()
             print(val_dataset)
-            self.val_shards = val_dataset.split(n=shard_count, locality_hints = self.workers)
+            self.val_shards = val_dataset.split(n=shard_count, equal = True, locality_hints = self.workers)
             print(self.val_shards)
 
             self.data_loaders_initialized = True
