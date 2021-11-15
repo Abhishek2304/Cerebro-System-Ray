@@ -26,9 +26,9 @@ def main():
 
     df = pd.read_csv(data_dir, sep = '\t', names = header_list, header = None)
 
-    print(data.head())
+    print(df.head())
     print()
-    print(data.columns)
+    print(df.columns)
     raise NotImplementedError
     print("Removing categorical features for now")
     for i in range(26):
