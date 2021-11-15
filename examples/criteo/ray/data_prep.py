@@ -38,7 +38,7 @@ def main():
 
     print("STARTING BACKEND NOW")
     backend = RayBackend(num_workers = 4)
-    store = LocalStore(OUTPUT_PATH, train_path=os.path.join(OUTPUT_PATH, 'train_data'), val_path=os.path.join(OUTPUT_PATH, 'val_data'))
+    store = LocalStore(OUTPUT_PATH, train_path=os.path.join(OUTPUT_PATH, 'train_data.parquet'), val_path=os.path.join(OUTPUT_PATH, 'val_data.parquet'))
 
     train_rows, val_rows, metadata, _ = backend.prepare_data(store, df, 0.2)
     backend.initialize_data_loaders(store)
