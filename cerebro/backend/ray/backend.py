@@ -120,11 +120,13 @@ class RayBackend(Backend):
         
         # Consider explicitly shutting down ray here, but before that make sure that all data is 
         # written to persistent storage
+
+        # Simply shutting down ray right now, may have to do more later
         ray.shutdown()
         
-        # Simply shutting down ray right now, may have to do more later
 
     def prepare_data(self, store, dataset, validation, num_partitions=None, parquet_row_group_size_mb=8, dataset_idx=None):
+        
         # IMP - Takes the number of partitions as equal to the number of workers here. DOES NOT USE THE num_partitions SUPPLIED.
         return util.prepare_data(self._num_workers(), store, dataset, validation, 
                             num_partitions=self._num_workers(), dataset_idx=dataset_idx, 
