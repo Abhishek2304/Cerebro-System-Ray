@@ -98,11 +98,10 @@ class RayBackend(Backend):
 
         if self.workers_initialized:
             shard_count = self._num_workers()
-            train_dataset = ray.data.read_parquet('/proj/orion-PG0/rayCriteoDataset/train_data.parquet')
-            # train_dataset = ray.data.read_parquet(store.get_train_data_path(dataset_idx)) # Figure out the index that needs to be passed, check if you
+            # train_dataset = ray.data.read_parquet('/proj/orion-PG0/rayCriteoDataset/train_data.parquet')
+            train_dataset = ray.data.read_parquet(store.get_train_data_path(dataset_idx)) # Figure out the index that needs to be passed, check if you
             # can load the entire table at once instead of index wise
             self.train_shards = train_dataset.split(n=shard_count, locality_hints = self.workers)
-            raise NotImplementedError
             val_dataset = ray.data.read_parquet(store.get_val_data_path(dataset_idx)) # Figure out the index that needs to be passed, check if you can
             # load the entire table at once instead of index wise
             self.val_shards = val_dataset.split(n=shard_count, locality_hints = self.workers)
