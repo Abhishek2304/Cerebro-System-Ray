@@ -59,8 +59,12 @@ def main():
     i = 0
     for shard, worker in zip(backend.train_shards, backend.workers):
         ref = worker.testing_function.remote(shard)
+        ref2 = worker.testing_function_2.remote(shard)
         print("worker:" + str(i))
         print(ray.get(ref))
+        data = ray.get(ref2)
+        print(data)
+        print(data.show(5))
         print()
         i += 1
     backend.teardown_workers()

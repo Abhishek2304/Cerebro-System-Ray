@@ -20,7 +20,7 @@ import pyarrow.csv as csv
 # Not specifying the number of CPUs in ray.remote (@ray.remote(num_cpus=1)) as we are doing a single core computation right now.
 # But may see if we want to specify it later or we dont want to keep it that dynamic. Also find a way to dynamically provide 
 # resources (num_cpus = 1 OR num_gpus = 1)
-@ray.remote(num_cpus = 4)
+@ray.remote
 class Worker(object):
     def __init__(self):
         self.completion_status = True
@@ -37,6 +37,9 @@ class Worker(object):
     def testing_function(self, data):
         time.sleep(0.01)
         return ray._private.services.get_node_ip_address()
+
+    def testing_function_2(self, data):
+        return data
 
 class RayBackend(Backend):
 
