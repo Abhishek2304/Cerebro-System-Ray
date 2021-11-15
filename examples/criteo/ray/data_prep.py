@@ -26,14 +26,10 @@ def main():
 
     df = pd.read_csv(data_dir, sep = '\t', names = header_list, header = None)
 
-    print(df.head())
-    print()
-    print(df.columns)
-    raise NotImplementedError
     print("Removing categorical features for now")
     for i in range(26):
         label = 'c' + str(i)
-        df = df.drop(label)
+        df = df.drop(columns = [label])
     print("FILLING NAs")
     df.fillna(0, inplace=True)
     print("SAMPLING")
