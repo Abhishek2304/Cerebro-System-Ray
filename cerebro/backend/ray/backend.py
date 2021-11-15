@@ -32,6 +32,9 @@ class Worker(object):
         self.completion_status = True
         return weights
 
+    def testing_function(data):
+        pass
+
 class RayBackend(Backend):
 
     def __init__(self, num_workers = None, start_timeout = 600, verbose = 1, 
@@ -99,9 +102,15 @@ class RayBackend(Backend):
         if self.workers_initialized:
             shard_count = self._num_workers()
             train_dataset = ray.data.read_parquet(store.get_train_data_path(dataset_idx)) 
+            print(train_dataset)
             self.train_shards = train_dataset.split(n=shard_count, locality_hints = self.workers)
+            print()
+            print(self.train_shards)
             val_dataset = ray.data.read_parquet(store.get_val_data_path(dataset_idx)) 
+            print()
+            print(val_dataset)
             self.val_shards = val_dataset.split(n=shard_count, locality_hints = self.workers)
+            print(self.val_shards)
 
             self.data_loaders_initialized = True
             
