@@ -1,16 +1,8 @@
 from __future__ import absolute_import
 
-import numbers
 import time
-import os
-import json
-import inspect
-import numpy as np
-import tensorflow as tf
 
 from ...backend import codec
-from ...backend import spark
-from ...commons.util import patch_hugginface_layer_methods
 from .util import TF_KERAS, TFKerasUtil
 from ..estimator import CerebroEstimator, CerebroModel
 
@@ -18,7 +10,6 @@ import threading
 
 LOCK = threading.Lock()
 MODEL_ID = -1
-
 
 def next_model_id():
     global LOCK, MODEL_ID

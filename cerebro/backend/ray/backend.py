@@ -1,10 +1,16 @@
 from __future__ import absolute_import
 
+import gc
+import h5py
+import io
+import inspect
 import random
 import numpy as np
 import tensorflow as tf
 import datetime
+import os
 import time
+import traceback
 
 from . import util
 from .. import constants
@@ -16,7 +22,6 @@ from ...commons.constants import exit_event
 import ray
 import psutil
 import pandas as pd
-import pyarrow.csv as csv
 
 # Not specifying the number of CPUs in ray.remote (@ray.remote(num_cpus=1)) as we are doing a single core computation right now.
 # But may see if we want to specify it later or we dont want to keep it that dynamic. Also find a way to dynamically provide 
@@ -29,10 +34,10 @@ class Worker(object):
     def get_completion_status(self):
         return self.completion_status
     
-    def execute_subepoch(fn, data_shard, is_train, initial_epoch):
+    def execute_subepoch(self, fn, data_shard, is_train, initial_epoch):
         try:
             self.completion_status = False
-            func_result = fn(data_shard, is_train, initial_epoch)
+            fn(data_shard, is_train, initial_epoch)
             self.completion_status = True
         except Exception as e:
             self.completion_status = True
@@ -62,9 +67,13 @@ class RayBackend(Backend):
     def __init__(self, num_workers = None, start_timeout = 600, verbose = 1, 
                 data_readers_pool_type = 'thread'):
 
-        # Putting ray.init() here, hoping it will not go out of scope once the __init__ function exits, but only when the
-        # class is destroyed. This may not be true, and may have to invoke ray.init() globally somehow.
-        ray.init(address = "auto")
+        # First try to detect cluster and connect to it. Else, run plain ray.init() for a single node.
+        try:
+            ray.init(address = "auto")
+            print("Running on a Ray Cluster")
+        except ConnectionError:
+            ray.init()
+            print("No cluster found, running on a single Ray instance")
 
         tmout = timeout.Timeout(start_timeout,
                                 message='Timed out waiting for {activity}. Please check that you have '
@@ -118,7 +127,7 @@ class RayBackend(Backend):
         self.workers = [Worker.options(name = str(i), lifetime = "detached").remote() for i in range(num_workers)]
         self.workers_initialized = True
 
-    def initialize_data_loaders(self, store, schema_Fields = None, dataset_idx = None):
+    def initialize_data_loaders(self, store, schema_Fields=None, dataset_idx=None):
         ### Assume data is in parquet format in train/val_data_path Initialize data loaders to read this parquet format and shard automatically
 
         if self.workers_initialized:
@@ -132,8 +141,7 @@ class RayBackend(Backend):
 
             self.data_loaders_initialized = True
         else:
-            raise Exception('Ray tasks not initialized for Cerebro. Please run RayBackend.initialize_workers() '
-                            'first!')
+            raise Exception('Ray tasks not initialized for Cerebro. Please run RayBackend.initialize_workers() first!')
 
     def teardown_workers(self):
         # Need to reimplement, probably not related to killing of the workers.
@@ -157,7 +165,7 @@ class RayBackend(Backend):
     def get_metadata_from_parquet(self, store, label_columns=['label'], feature_columns=['features'], dataset_idx = None):
         return util.get_simple_meta_from_parquet(store, label_columns + feature_columns, dataset_idx = dataset_idx)
 
-    def train_for_one_epoch(self, models, store, feature_col, label_col, is_train=True):
+    def train_for_one_epoch(self, models, store, feature_cols, label_cols, is_train=True):
         
         mode = "Training"
         if not is_train:
@@ -182,7 +190,7 @@ class RayBackend(Backend):
             else:
                 a_label_col = label_cols
             
-            sub_epoch_trainers.append(_get_remote_trainer(model, self, a_store, None, a_feature_col, a_label_col, is_train, self.settings.verbose))
+            sub_epoch_trainers.append(_get_remote_trainer(model, a_store, None, a_feature_col, a_label_col))
 
         Q = [(i, j) for i in range(len(models)) for j in range(self.settings.num_workers)]
         random.shuffle(Q)
@@ -201,7 +209,7 @@ class RayBackend(Backend):
                     model_on_worker[j] = i
                     if is_train: data_shard = self.train_shards[j]
                     else: data_shard = self.val_shards[j]
-                    self.workers[j].execute_subepoch.remote(sub_epoch_trainers[i], data_shard, is_train, models[m].epoch)
+                    self.workers[j].execute_subepoch.remote(sub_epoch_trainers[i], data_shard, is_train, models[i].epoch)
                     break
 
         while not exit_event.is_set() and len(Q) > 0:
@@ -219,10 +227,10 @@ class RayBackend(Backend):
             exit_event.wait(self.settings.polling_period)
 
 
-def _get_remote_trainer(estimator, backend, store, dataset_idx, feature_columns, label_columns):
+def _get_remote_trainer(estimator, store, dataset_idx, feature_columns, label_columns):
     run_id = estimator.getRunId()
     
-    train_rows, val_rows, metadata, avg_row_size = \
+    _, _, metadata, _ = \
         util.get_simple_meta_from_parquet(store,
                                           schema_cols=label_columns + feature_columns,
                                           dataset_idx=dataset_idx)
@@ -238,30 +246,19 @@ def _get_remote_trainer(estimator, backend, store, dataset_idx, feature_columns,
             ckpt_file = os.path.join(run_output_dir, remote_store.checkpoint_filename)
             model.save(ckpt_file)
             remote_store.sync(run_output_dir)
-    return sub_epoch_trainer(estimator, metadata, keras_utils, run_id, dataset_idx,
-                                train_rows, val_rows, backend._num_workers())
+    return sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx)
 
 
-def sub_epoch_trainer(estimator, metadata, keras_utils, run_id, dataset_idx, train_rows, val_rows,
-                      num_workers):
+def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
     # Estimator parameters
-    label_columns = estimator.label_cols
-    feature_columns = estimator.feature_cols
     user_callbacks = estimator.callbacks
-    batch_size = estimator.batch_size
     custom_objects = estimator.custom_objects
     metrics_names = [name.__name__ if callable(name) else name for name in estimator.metrics]
     user_verbose = estimator.verbose
 
-    # Model parameters
-    input_shapes, output_shapes = estimator.get_model_shapes()
-    output_names = estimator.model.output_names
-    input_names = estimator.model.input_names
-
     floatx = tf.keras.backend.floatx()
     fit_sub_epoch_fn = keras_utils.fit_sub_epoch_fn()
     eval_sub_epoch_fn = keras_utils.eval_sub_epoch_fn()
-    transformation_fn = estimator.transformation_fn
 
     # Utility functions
     deserialize_keras_model = _deserialize_keras_model_fn()
@@ -299,8 +296,6 @@ def sub_epoch_trainer(estimator, metadata, keras_utils, run_id, dataset_idx, tra
                 model = deserialize_keras_model(
                     remote_store.get_last_checkpoint(), lambda x: tf.keras.models.load_model(x))
 
-            schema_fields = feature_columns + label_columns
-
             if is_train:
                 initialization_time = time.time() - begin_time
                 begin_time = time.time()
@@ -331,7 +326,6 @@ def sub_epoch_trainer(estimator, metadata, keras_utils, run_id, dataset_idx, tra
                       'Finalization Time: {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                         run_id, 'TRAIN' if is_train else 'VALID', initialization_time, training_time, finalization_time))
 
-            data_reader.reset()
             return result, step_counter_callback.get_step_count()
 
     return train
