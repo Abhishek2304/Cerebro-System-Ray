@@ -200,7 +200,7 @@ class RayBackend(Backend):
         model_on_worker = [-1 for _ in range(self.settings.num_workers)]
 
         def place_model_on_worker(j):
-            random.shuffle(Q)
+            # random.shuffle(Q) # TODO: Is this needed?
             for idx, s in enumerate(Q):
                 i, j_prime = s
                 if j_prime == j and model_idle[i]:
@@ -238,11 +238,11 @@ def _get_remote_trainer(estimator, store, dataset_idx, feature_columns, label_co
     keras_utils = estimator._get_keras_utils()
 
     # Checkpointing the model if it does not exist.
-    if not estimator._has_checkpoint(run_id):
-        remote_store = store.to_remote(run_id, dataset_idx)
+    if not estimator._has_checkpoint(run_id): # TODO: Check if you need to use the Ray store instead (WHOLE BLOCK)
+        remote_store = store.to_remote(run_id, dataset_idx) 
 
         with remote_store.get_local_output_dir() as run_output_dir:
-            model = estimator._compile_model(keras_utils)
+            model = estimator._compile_model(keras_utils) # TODO: Is it defined in Ray Estimator?
             ckpt_file = os.path.join(run_output_dir, remote_store.checkpoint_filename)
             model.save(ckpt_file)
             remote_store.sync(run_output_dir)
@@ -261,12 +261,12 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
     eval_sub_epoch_fn = keras_utils.eval_sub_epoch_fn()
 
     # Utility functions
-    deserialize_keras_model = _deserialize_keras_model_fn()
-    pin_gpu = _pin_gpu_fn()
+    deserialize_keras_model = _deserialize_keras_model_fn() #TODO: If implementing ray store, do we need this function?
+    pin_gpu = _pin_gpu_fn() 
 
     # Storage
-    store = estimator.store
-    remote_store = store.to_remote(run_id, dataset_idx)
+    store = estimator.store # TODO:Check if you need to use the Ray store instead
+    remote_store = store.to_remote(run_id, dataset_idx) # TODO: Check if you need to use the Ray store instead
 
     def train(data_shard, is_train, starting_epoch, local_task_index=0):
 
@@ -286,12 +286,12 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
         verbose = user_verbose
 
         with remote_store.get_local_output_dir() as run_output_dir:
-            step_counter_callback = KerasStepCounter()
+            step_counter_callback = KerasStepCounter() # Is it making a new Step Counter everytime, so the counter is always 1?
             callbacks = [step_counter_callback]
             callbacks = callbacks + user_callbacks
-            ckpt_file = os.path.join(run_output_dir, remote_store.checkpoint_filename)
+            ckpt_file = os.path.join(run_output_dir, remote_store.checkpoint_filename) ## TODO: Check if using Ray store instead of physical store.
 
-            # restoring the model from the previous checkpoint
+            # restoring the model from the previous checkpoint #TODO: Check what to do for Ray Store
             with tf.keras.utils.custom_object_scope(custom_objects):
                 model = deserialize_keras_model(
                     remote_store.get_last_checkpoint(), lambda x: tf.keras.models.load_model(x))
@@ -303,7 +303,7 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
                 training_time = time.time() - begin_time
                 begin_time = time.time()
                 result = {'train_' + name: result[name] for name in result}
-                model.save(ckpt_file)
+                model.save(ckpt_file) # TODO: Check how to work with Ray store, passing to and from checkpoint, and a final saving of model.
             else:
                 initialization_time = time.time() - begin_time
                 begin_time = time.time()
