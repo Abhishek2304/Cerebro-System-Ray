@@ -105,6 +105,37 @@ class RayEstimator(CerebroEstimator):
         model_bytes = self.store.read(last_ckpt_path)
         return codec.dumps_base64(model_bytes)
     
+    def _compile_model(self, keras_utils):
+        # Compile the model with all the parameters
+        model = self.getModel()
+
+        loss = self.getLoss()
+        loss_weights = self.getLossWeights()
+
+        if not loss:
+            raise ValueError('Loss parameter is required for the model to compile')
+
+        optimizer = self.getOptimizer()
+        if not optimizer:
+            optimizer = model.optimizer
+
+        if not optimizer:
+            raise ValueError('Optimizer must be provided either as a parameter or as part of a '
+                             'compiled model')
+
+        metrics = self.getMetrics()
+        optimizer_weight_values = optimizer.get_weights()
+
+        model.compile(optimizer=optimizer,
+                      loss=loss,
+                      loss_weights=loss_weights,
+                      metrics=metrics)
+
+        if optimizer_weight_values:
+            model.optimizer.set_weights(optimizer_weight_values)
+
+        return model
+    
     def create_model(self, history, run_id, metadata):
         keras_utils = TFKerasUtil
         keras_module = keras_utils.keras()
