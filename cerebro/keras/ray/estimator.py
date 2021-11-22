@@ -68,6 +68,18 @@ class RayEstimator(CerebroEstimator):
         run_id = 'model_' + str(next_model_id()) + '_' + str(int(time.time()))
         self.run_id = run_id
 
+    def setModel(self,model):
+        self.model = model
+
+    def setCustomObjects(self,custom_objects):
+        self.custom_objects = custom_objects
+
+    def setOptimizer(self,optimizer):
+        self.optimizer = optimizer
+
+    def setLossWeights (self, weights):
+        self.loss_weights = weights
+
     def setFeatureCols(self,feature_cols):
         self.feature_cols = feature_cols
 
@@ -85,6 +97,12 @@ class RayEstimator(CerebroEstimator):
     
     def getRunId(self):
         return self.run_id
+
+    def getModel(self):
+        return self.model
+
+    def getCustomObjects(self):
+        return self.custom_objects
     
     def _get_keras_utils(self):
         return TFKerasUtil
