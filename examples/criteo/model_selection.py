@@ -78,6 +78,7 @@ def main():
     for i in range(26):
         label = 'c' + str(i)
         df = df.drop(columns = [label])
+    df = df.sample(frac = 0.1)
     df.fillna(0, inplace=True)
 
     df = (df - df.min())/(df.max() - df.min())
@@ -88,6 +89,13 @@ def main():
         df = df.drop(columns = [label])
     
     print(df.head())
+
+    # print("STARTING BACKEND NOW")
+    # backend = RayBackend(num_workers = 4)
+    # store = LocalStore(OUTPUT_PATH, train_path=os.path.join(OUTPUT_PATH, 'train_data.parquet'), val_path=os.path.join(OUTPUT_PATH, 'val_data.parquet'))
+
+    # train_rows, val_rows, metadata, _ = backend.prepare_data(store, df, 0.2)
+    # backend.teardown_workers()
 
     # print("STARTING BACKEND NOW")
     # backend = RayBackend(num_workers = NUM_PARTITIONS)
