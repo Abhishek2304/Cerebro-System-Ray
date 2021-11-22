@@ -232,9 +232,6 @@ def _get_remote_trainer(estimator, store, dataset_idx, feature_columns, label_co
 
     estimator._check_params(metadata)
     keras_utils = estimator._get_keras_utils()
-    print()
-    print(keras_utils)
-    print()
 
     # Checkpointing the model if it does not exist.
     if not estimator._has_checkpoint(run_id): # TODO: Check if you need to use the Ray store instead (WHOLE BLOCK)
@@ -302,7 +299,10 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
             model = deserialize_keras_model(
                 remote_store.get_last_checkpoint(), lambda x: tf.keras.models.load_model(x))
             
-
+            if starting_epoch is None:
+                starting_epoch = 0
+                model.setEpoch(starting_epoch)
+                
             if is_train:
                 initialization_time = time.time() - begin_time
                 begin_time = time.time()

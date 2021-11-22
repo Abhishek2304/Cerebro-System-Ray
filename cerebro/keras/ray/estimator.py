@@ -77,6 +77,9 @@ class RayEstimator(CerebroEstimator):
     def setOptimizer(self,optimizer):
         self.optimizer = optimizer
 
+    def setEpoch(self, epoch):
+        self.epoch = epoch
+
     def setLossWeights (self, weights):
         self.loss_weights = weights
 
@@ -100,6 +103,9 @@ class RayEstimator(CerebroEstimator):
 
     def getModel(self):
         return self.model
+    
+    def getEpoch(self):
+        return self.epoch
 
     def getCustomObjects(self):
         return self.custom_objects
