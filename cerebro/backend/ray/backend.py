@@ -39,6 +39,9 @@ class Worker(object):
         print()
         print()
         data_shard = data_shard.to_pandas()
+        target = data_shard.pop('label')
+        data = tf.convert_to_tensor(data_shard)
+        print(data)
         # print(data_shard.head())
         # data = arrow_io.ArrowDataset.from_pandas(data_shard)
         # print()
@@ -46,7 +49,7 @@ class Worker(object):
         # print(data)
         # print()
         # print()
-        # raise NotImplementedError
+        raise NotImplementedError
         try:
             self.completion_status = False
             fn(data_shard, is_train, initial_epoch)
