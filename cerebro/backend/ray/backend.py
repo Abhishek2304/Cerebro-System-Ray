@@ -40,7 +40,7 @@ class Worker(object):
         print()
         data_shard = data_shard.to_pandas()
         target = data_shard.pop('label')
-        data = tf.convert_to_tensor(data_shard)
+        data = tf.convert_to_tensor(np.asarray(data_shard).astype('float32'))
         print(data)
         # print(data_shard.head())
         # data = arrow_io.ArrowDataset.from_pandas(data_shard)
