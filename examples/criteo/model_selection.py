@@ -48,7 +48,7 @@ def estimator_gen_fn(params): # lr, lambda_value
         model=model,
         optimizer=optimizer,
         loss=loss,
-        metrics=['loss'],
+        metrics=['acc'],
         batch_size=128,
         transformation_fn=None)
 
