@@ -40,7 +40,7 @@ class Worker(object):
         print()
         data_shard = data_shard.to_pandas()
         target = data_shard.pop('label')
-        data = np.array[arr.tolist() for arr in np.asarray(data_shard)]
+        data = np.array([arr.tolist() for arr in np.asarray(data_shard)])
         print(data)
         print(data.shape)
         print(data.dtype)
