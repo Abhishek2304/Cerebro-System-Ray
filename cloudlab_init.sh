@@ -11,6 +11,7 @@ source env_cerebro/bin/activate
 pip3 install --upgrade pip
 pip3 install tensorflow==2.3.0
 pip3 install cython
+pip3 install py4j==0.10.9.2
 
 git clone https://github.com/Abhishek2304/cerebro-system.git && cd cerebro-system && make
 
