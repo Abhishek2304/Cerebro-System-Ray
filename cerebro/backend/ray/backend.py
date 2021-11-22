@@ -38,7 +38,9 @@ class Worker(object):
     def execute_subepoch(self, fn, data_shard, is_train, initial_epoch):
         print()
         print()
-        data = arrow_io.ArrowDataset.from_pandas(data_shard.to_pandas())
+        data_shard = data_shard.to_pandas()
+        print(data_shard.head())
+        data = arrow_io.ArrowDataset.from_pandas(data_shard)
         print()
         print()
         print(data)
