@@ -142,7 +142,7 @@ class RayBackend(Backend):
             train_dataset = ray.data.read_parquet(store.get_train_data_path(dataset_idx)) 
             print()
             print()
-            print(train_dataset.show(5))
+            print(train_dataset)
             print()
             print()
             self.train_shards = train_dataset.split(n=shard_count, equal=True, locality_hints=self.workers)
