@@ -44,9 +44,9 @@ class Worker(object):
         target = data_shard.pop('label')
         data_np = np.array([arr.tolist() for arr in np.asarray(data_shard)]).astype('float64')
         data = tf.convert_to_tensor(data_np)
-        
+        print(data)
         # print('Target')
-        # target = tf.convert_to_tensor(np.asarray(target))
+        target = tf.convert_to_tensor(np.asarray(target))
         # print(target)
         
         try:
