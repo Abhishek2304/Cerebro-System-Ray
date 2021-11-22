@@ -25,6 +25,8 @@ from __future__ import absolute_import
 
 from .spark.estimator import SparkEstimator
 from .estimator import CerebroModel
+from .ray.estimator import RayEstimator
 
 SparkEstimator.__module__ = "cerebro.keras"
 CerebroModel.__module__ = "cerebro.keras"
+RayEstimator.__modeule__ = "cerebro.keras"

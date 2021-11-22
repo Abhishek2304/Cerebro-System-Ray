@@ -7,7 +7,7 @@ import tensorflow.keras as keras
 
 from cerebro.backend.ray.backend import RayBackend
 from cerebro.storage import LocalStore
-from cerebro.keras.ray.estimator import RayEstimator
+from cerebro.keras import RayEstimator
 from cerebro.tune import RandomSearch, GridSearch, hp_choice
 
 import random
