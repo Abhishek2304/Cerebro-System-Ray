@@ -231,12 +231,13 @@ def _get_remote_trainer(estimator, store, dataset_idx, feature_columns, label_co
         util.get_simple_meta_from_parquet(store,
                                           schema_cols=label_columns + feature_columns,
                                           dataset_idx=dataset_idx)
-    estimator._check_params(metadata)
+
     print()
     print()
     print(metadata)
     print()
     print()
+    estimator._check_params(metadata)
     keras_utils = estimator._get_keras_utils()
 
     # Checkpointing the model if it does not exist.
