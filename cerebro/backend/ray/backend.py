@@ -35,6 +35,15 @@ class Worker(object):
         return self.completion_status
     
     def execute_subepoch(self, fn, data_shard, is_train, initial_epoch):
+        print()
+        print()
+        print(data_shard)
+        print()
+        print()
+        print(data_shard.show(5))
+        print()
+        print()
+        raise NotImplementedError
         try:
             self.completion_status = False
             fn(data_shard, is_train, initial_epoch)
