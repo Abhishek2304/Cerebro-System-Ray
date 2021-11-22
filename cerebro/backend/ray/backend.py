@@ -132,26 +132,10 @@ class RayBackend(Backend):
 
         if self.workers_initialized:
             shard_count = self._num_workers()
-
-            print()
-            print()
-            print(store.get_train_data_path(dataset_idx))
-            print()
-            print()
             
-            train_dataset = ray.data.read_parquet(store.get_train_data_path(dataset_idx)) 
-            print()
-            print()
-            print(train_dataset)
-            print()
-            print()
-            self.train_shards = train_dataset.split(n=shard_count, equal=True, locality_hints=self.workers)
-
-            print()
-            print()
-            print(store.get_val_data_path(dataset_idx))
-            print()
-            print()
+            # train_dataset = ray.data.read_parquet(store.get_train_data_path(dataset_idx)) 
+            
+            # self.train_shards = train_dataset.split(n=shard_count, equal=True, locality_hints=self.workers)
             
             val_dataset = ray.data.read_parquet(store.get_val_data_path(dataset_idx)) 
             self.val_shards = val_dataset.split(n=shard_count, equal=True, locality_hints=self.workers)
