@@ -99,10 +99,7 @@ def main():
     print("STARTING BACKEND NOW")
     backend = RayBackend(num_workers = NUM_PARTITIONS)
     store = LocalStore(OUTPUT_PATH, train_path=os.path.join(OUTPUT_PATH, 'train_data.parquet'), val_path=os.path.join(OUTPUT_PATH, 'val_data.parquet'))
-    print("STARTING INITIALIZE DATA LOADERS")
-    backend.initialize_data_loaders(store)
-    print("INITIALISATION DONE")
-
+    
     param_grid_criteo = {
     "lr": hp_choice([1e-3, 1e-4]),
     "lambda_value": hp_choice([1e-4, 1e-5]),
