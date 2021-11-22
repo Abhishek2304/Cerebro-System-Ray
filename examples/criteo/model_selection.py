@@ -61,7 +61,7 @@ def main():
     OUTPUT_PATH = "/proj/orion-PG0/rayCriteoDataset/"
     # TRAIN_FRACTION = 0.7
 
-    # NUM_PARTITIONS = 4
+    NUM_PARTITIONS = 4
 
     # header_list = ['label']
     # for i in range(13):
