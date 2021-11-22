@@ -287,7 +287,8 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
         with remote_store.get_local_output_dir() as run_output_dir:
             step_counter_callback = KerasStepCounter() # Is it making a new Step Counter everytime, so the counter is always 1?
             callbacks = [step_counter_callback]
-            callbacks = callbacks + user_callbacks
+            if user_callbacks is not None:
+                callbacks = callbacks + user_callbacks
             ckpt_file = os.path.join(run_output_dir, remote_store.checkpoint_filename) ## TODO: Check if using Ray store instead of physical store.
 
             # restoring the model from the previous checkpoint #TODO: Check what to do for Ray Store
