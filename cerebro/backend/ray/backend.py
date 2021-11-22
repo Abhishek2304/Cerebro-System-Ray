@@ -38,23 +38,17 @@ class Worker(object):
     def execute_subepoch(self, fn, data_shard, is_train, initial_epoch):
         print()
         print()
-        print(data_shard.count())
+
         data_shard = data_shard.to_pandas()
         print(len(data_shard))
         target = data_shard.pop('label')
         data_np = np.array([arr.tolist() for arr in np.asarray(data_shard)]).astype('float64')
         data = tf.convert_to_tensor(data_np)
         
-        print('Target')
-        target = tf.convert_to_tensor(np.asarray(target))
-        print(target)
-        # data = arrow_io.ArrowDataset.from_pandas(data_shard)
-        # print()
-        # print()
-        # print(data)
-        # print()
-        # print()
-        raise NotImplementedError
+        # print('Target')
+        # target = tf.convert_to_tensor(np.asarray(target))
+        # print(target)
+        
         try:
             self.completion_status = False
             fn(data_shard, is_train, initial_epoch)
