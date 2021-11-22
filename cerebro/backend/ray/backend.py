@@ -39,14 +39,14 @@ class Worker(object):
         print()
         print()
         data_shard = data_shard.to_pandas()
-        print(data_shard.head())
-        data = arrow_io.ArrowDataset.from_pandas(data_shard)
-        print()
-        print()
-        print(data)
-        print()
-        print()
-        raise NotImplementedError
+        # print(data_shard.head())
+        # data = arrow_io.ArrowDataset.from_pandas(data_shard)
+        # print()
+        # print()
+        # print(data)
+        # print()
+        # print()
+        # raise NotImplementedError
         try:
             self.completion_status = False
             fn(data_shard, is_train, initial_epoch)
