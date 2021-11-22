@@ -110,13 +110,6 @@ class RayBackend(Backend):
         self.val_shards = None
 
         # Add self.num_data_readers if it is different from num_workers
-        
-        # May not need the below attributes, remove if not needed for Ray
-        self.rand = np.random.RandomState(constants.RANDOM_SEED)
-
-        # Check this again, since these initializations are never called.
-        self.initialize_workers()
-        # self.initialize_data_loaders() # Need to provide the store to initialize_data_loaders()
 
     def _num_workers(self):
         return self.settings.num_workers
