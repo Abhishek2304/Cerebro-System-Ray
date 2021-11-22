@@ -106,7 +106,7 @@ def main():
     # "batch_size": hp_choice([32, 64, 256, 512]),
     }
 
-    model_selection = GridSearch(backend, store, estimator_gen_fn, param_grid_criteo, 10, evaluation_metric='loss',
+    model_selection = GridSearch(backend, store, estimator_gen_fn, param_grid_criteo, 10, evaluation_metric='acc',
                         feature_columns=['features'], label_columns=['label'])
     model = model_selection.fit_on_prepared_data()
     backend.teardown_workers
