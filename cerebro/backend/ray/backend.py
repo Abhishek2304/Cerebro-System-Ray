@@ -238,7 +238,7 @@ def _get_remote_trainer(estimator, store, dataset_idx, feature_columns, label_co
         remote_store = store.to_remote(run_id, dataset_idx) 
 
         with remote_store.get_local_output_dir() as run_output_dir:
-            model = estimator._compile_model(keras_utils) # TODO: Is it defined in Ray Estimator?
+            model = estimator._compile_model(keras_utils) 
             ckpt_file = os.path.join(run_output_dir, remote_store.checkpoint_filename)
             model.save(ckpt_file)
             remote_store.sync(run_output_dir)
@@ -295,6 +295,11 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
             # with tf.keras.utils.custom_object_scope(custom_objects):
             #     model = deserialize_keras_model(
             #         remote_store.get_last_checkpoint(), lambda x: tf.keras.models.load_model(x))
+            print()
+            print()
+            print(remote_store.get_last_checkpoint())
+            print()
+            print()
             model = deserialize_keras_model(
                 remote_store.get_last_checkpoint(), lambda x: tf.keras.models.load_model(x))
             
