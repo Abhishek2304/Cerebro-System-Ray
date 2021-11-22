@@ -38,10 +38,12 @@ class Worker(object):
     def execute_subepoch(self, fn, data_shard, is_train, initial_epoch):
         print()
         print()
-        data = arrow_io.ArrowDataset(data_shard, ['features', 'labels'])
-        print()
-        print()
+        data_shard = data_shard.map(lambda x: {'label': x['label'], 'features': x['features'][0])
         print(data_shard.show(5))
+        data = arrow_io.ArrowDataset(data_shard, ['features', 'labels'], [tf.float64, tf.float64])
+        print()
+        print()
+        print(data)
         print()
         print()
         raise NotImplementedError
