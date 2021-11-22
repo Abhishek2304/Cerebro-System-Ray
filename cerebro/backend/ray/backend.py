@@ -38,8 +38,7 @@ class Worker(object):
     def execute_subepoch(self, fn, data_shard, is_train, initial_epoch):
         print()
         print()
-        print(data_shard.take())
-        print(len(data_shard.take()))
+        print(data_shard.count())
         data_shard = data_shard.to_pandas()
         target = data_shard.pop('label')
         # data_np = np.array([arr.tolist() for arr in np.asarray(data_shard)]).astype('float64')
