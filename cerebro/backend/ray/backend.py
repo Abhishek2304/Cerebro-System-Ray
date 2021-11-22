@@ -11,6 +11,7 @@ import datetime
 import os
 import time
 import traceback
+import tensorflow_io.arrow as arrow_io
 
 from . import util
 from .. import constants
@@ -37,7 +38,7 @@ class Worker(object):
     def execute_subepoch(self, fn, data_shard, is_train, initial_epoch):
         print()
         print()
-        print(data_shard)
+        data = arrow_io.ArrowDataset(data_shard, ['features', 'labels'])
         print()
         print()
         print(data_shard.show(5))
