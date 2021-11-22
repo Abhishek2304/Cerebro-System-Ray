@@ -63,9 +63,25 @@ class RayEstimator(CerebroEstimator):
         self.callbacks = callbacks
         self.transformation_fn = transformation_fn
         self.verbose = verbose
+        self.hparams = None
 
         run_id = 'model_' + str(next_model_id()) + '_' + str(int(time.time()))
         self.run_id = run_id
+
+    def setFeatureCols(self,feature_cols):
+        self.feature_cols = feature_cols
+
+    def setLabelCols(self,label_cols):
+        self.label_cols = label_cols
+
+    def setStore(self,store):
+        self.store = store
+    
+    def setVerbose(self, verbose):
+        self.verbose = verbose
+
+    def setHyperParams(self, params):
+        self.hparams = params
     
     def getRunId(self):
         return self.run_id
