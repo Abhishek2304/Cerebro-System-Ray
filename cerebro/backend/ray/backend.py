@@ -133,16 +133,19 @@ class RayBackend(Backend):
         if self.workers_initialized:
             shard_count = self._num_workers()
             
-            # train_dataset = ray.data.read_parquet(store.get_train_data_path(dataset_idx), parallelism=1000) 
-            
-            # self.train_shards = train_dataset.split(n=shard_count, equal=True, locality_hints=self.workers)
+            train_dataset = ray.data.read_parquet(store.get_train_data_path(dataset_idx), parallelism=1000) 
+            self.train_shards = train_dataset.split(n=shard_count, equal=True, locality_hints=self.workers)
             
             val_dataset = ray.data.read_parquet(store.get_val_data_path(dataset_idx)) 
             self.val_shards = val_dataset.split(n=shard_count, equal=True, locality_hints=self.workers)
 
+            print()
+            print()
             print("Out of Val")
             self.data_loaders_initialized = True
             print("Out of Dataloader")
+            print()
+            print()
         else:
             raise Exception('Ray tasks not initialized for Cerebro. Please run RayBackend.initialize_workers() first!')
 
