@@ -168,9 +168,7 @@ class RayBackend(Backend):
             print('CEREBRO => Time: {}, Starting EPOCH {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), mode))
         
         sub_epoch_trainers = []
-        print()
-        print(store)
-        print()
+        
         for model in models:
             if type(store) == dict:
                 a_store = store[model.getRunId()]
@@ -232,11 +230,6 @@ def _get_remote_trainer(estimator, store, dataset_idx, feature_columns, label_co
                                           schema_cols=label_columns + feature_columns,
                                           dataset_idx=dataset_idx)
 
-    print()
-    print()
-    print(metadata)
-    print()
-    print()
     estimator._check_params(metadata)
     keras_utils = estimator._get_keras_utils()
 
@@ -271,6 +264,8 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
     store = estimator.store # TODO:Check if you need to use the Ray store instead
     remote_store = store.to_remote(run_id, dataset_idx) # TODO: Check if you need to use the Ray store instead
 
+
+
     def train(data_shard, is_train, starting_epoch, local_task_index=0):
 
         begin_time = time.time()
@@ -278,9 +273,10 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
         # Workaround for the issue with huggingface layers needing a python
         # object as config (not a dict) and explicit definition of get_config method.
         # We monkey patch the __init__ method get_config methods of such layers.
-        for k in custom_objects:
-            if issubclass(custom_objects[k], tf.keras.layers.Layer) and inspect.getmodule(custom_objects[k]).__name__.startswith('transformers.'):
-                patch_hugginface_layer_methods(custom_objects[k])
+        if custom_objects is not None:
+            for k in custom_objects:
+                if issubclass(custom_objects[k], tf.keras.layers.Layer) and inspect.getmodule(custom_objects[k]).__name__.startswith('transformers.'):
+                    patch_hugginface_layer_methods(custom_objects[k])
 
         tf.keras.backend.set_floatx(floatx)
         pin_gpu(local_task_index)
