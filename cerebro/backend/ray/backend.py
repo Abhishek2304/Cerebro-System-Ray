@@ -40,8 +40,8 @@ class Worker(object):
         print()
         data_shard = data_shard.to_pandas()
         target = data_shard.pop('label')
-        
-        data = tf.convert_to_tensor(np.array([arr.tolist() for arr in np.asarray(data_shard).astype('float64')]))
+        data_np = np.array([arr.tolist() for arr in np.asarray(data_shard)]).astype('float64')
+        data = tf.convert_to_tensor(data_np)
         print('Data')
         print(data)
         print()
