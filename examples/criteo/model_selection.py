@@ -57,24 +57,54 @@ def estimator_gen_fn(params): # lr, lambda_value
 
 def main():
 
+    data_dir = "/proj/orion-PG0/rayCriteoDataset/valid_0.tsv"
     OUTPUT_PATH = "/proj/orion-PG0/rayCriteoDataset/"
+    TRAIN_FRACTION = 0.7
 
-    print("STARTING BACKEND NOW")
-    backend = RayBackend(num_workers = 4)
-    store = LocalStore(OUTPUT_PATH, train_path=os.path.join(OUTPUT_PATH, 'train_0.parquet'), val_path=os.path.join(OUTPUT_PATH, 'valid_0.parquet'))
-    print("STARTING INITIALIZE DATA LOADERS")
-    backend.initialize_data_loaders(store)
-    print("INITIALISATION DONE")
+    NUM_PARTITIONS = 4
 
-    param_grid_criteo = {
-    "lr": hp_choice([1e-3, 1e-4]),
-    "lambda_value": hp_choice([1e-4, 1e-5]),
-    # "batch_size": hp_choice([32, 64, 256, 512]),
-    }
+    header_list = ['label']
+    for i in range(13):
+        label = 'n' + str(i)
+        header_list.append(label)
+    for i in range(26):
+        label = 'c' + str(i)
+        header_list.append(label)
 
-    model_selection = GridSearch(backend, store, estimator_gen_fn, search_space, 10, evaluation_metric='loss',
-                        feature_columns=['features'], label_columns=['labels'])
-    model = model_selection.fit_on_prepared_data()
+    df = pd.read_csv(data_dir, sep = '\t', names = header_list, header = None)
+    print("Reading Done")
+
+    print("Preparing dataset")
+    for i in range(26):
+        label = 'c' + str(i)
+        df = df.drop(columns = [label])
+    df.fillna(0, inplace=True)
+
+    df = (df - df.min())/(df.max() - df.min())
+    df['features'] = df.apply(lambda x: list([x['n0'], x['n1'],x['n2'], x['n3'],x['n4'], x['n5'],x['n6'], x['n7'],
+                                                x['n8'], x['n9'],x['n10'], x['n11'],x['n12']]), axis = 1)
+    for i in range(13):
+        label = 'n' + str(i)
+        df = df.drop(columns = [label])
+    
+    print(df.head())
+
+    # print("STARTING BACKEND NOW")
+    # backend = RayBackend(num_workers = NUM_PARTITIONS)
+    # store = LocalStore(OUTPUT_PATH, train_path=os.path.join(OUTPUT_PATH, 'train_0.parquet'), val_path=os.path.join(OUTPUT_PATH, 'valid_0.parquet'))
+    # print("STARTING INITIALIZE DATA LOADERS")
+    # backend.initialize_data_loaders(store)
+    # print("INITIALISATION DONE")
+
+    # param_grid_criteo = {
+    # "lr": hp_choice([1e-3, 1e-4]),
+    # "lambda_value": hp_choice([1e-4, 1e-5]),
+    # # "batch_size": hp_choice([32, 64, 256, 512]),
+    # }
+
+    # model_selection = GridSearch(backend, store, estimator_gen_fn, search_space, 10, evaluation_metric='loss',
+    #                     feature_columns=['features'], label_columns=['labels'])
+    # model = model_selection.fit_on_prepared_data()
 
 if __name__ == "__main__":
     main()
