@@ -295,11 +295,7 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
             # with tf.keras.utils.custom_object_scope(custom_objects):
             #     model = deserialize_keras_model(
             #         remote_store.get_last_checkpoint(), lambda x: tf.keras.models.load_model(x))
-            print()
-            print()
-            print(remote_store.get_last_checkpoint())
-            print()
-            print()
+            
             model = deserialize_keras_model(
                 remote_store.get_last_checkpoint(), lambda x: tf.keras.models.load_model(x))
             
@@ -343,6 +339,11 @@ def _deserialize_keras_model_fn():
     def deserialize_keras_model(model_bytes, load_model_fn):
         """Deserialize model from byte array encoded in base 64."""
         bio = io.BytesIO(model_bytes)
+        print()
+        print()
+        print(bio)
+        print()
+        print()
         with h5py.File(bio, 'r') as f:
             return load_model_fn(f)
 
