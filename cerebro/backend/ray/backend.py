@@ -301,8 +301,7 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
             
             if starting_epoch is None:
                 starting_epoch = 0
-                model.setEpoch(starting_epoch)
-                
+
             if is_train:
                 initialization_time = time.time() - begin_time
                 begin_time = time.time()
