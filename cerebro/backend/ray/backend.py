@@ -135,8 +135,6 @@ class RayBackend(Backend):
             
             train_dataset = ray.data.read_parquet(store.get_train_data_path(dataset_idx), parallelism=1000) 
             self.train_shards = train_dataset.split(n=shard_count, equal=True, locality_hints=self.workers)
-            print(self.train_shards)
-            print(self.train_shards[0].show(5))
             
             val_dataset = ray.data.read_parquet(store.get_val_data_path(dataset_idx)) 
             self.val_shards = val_dataset.split(n=shard_count, equal=True, locality_hints=self.workers)
