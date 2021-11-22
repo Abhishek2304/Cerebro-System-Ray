@@ -232,6 +232,9 @@ def _get_remote_trainer(estimator, store, dataset_idx, feature_columns, label_co
 
     estimator._check_params(metadata)
     keras_utils = estimator._get_keras_utils()
+    print()
+    print(keras_utils)
+    print()
 
     # Checkpointing the model if it does not exist.
     if not estimator._has_checkpoint(run_id): # TODO: Check if you need to use the Ray store instead (WHOLE BLOCK)
@@ -339,11 +342,6 @@ def _deserialize_keras_model_fn():
     def deserialize_keras_model(model_bytes, load_model_fn):
         """Deserialize model from byte array encoded in base 64."""
         bio = io.BytesIO(model_bytes)
-        print()
-        print()
-        print(bio)
-        print()
-        print()
         with h5py.File(bio, 'r') as f:
             return load_model_fn(f)
 
