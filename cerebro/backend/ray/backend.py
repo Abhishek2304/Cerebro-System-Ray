@@ -168,6 +168,9 @@ class RayBackend(Backend):
             print('CEREBRO => Time: {}, Starting EPOCH {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), mode))
         
         sub_epoch_trainers = []
+        print()
+        print(store)
+        print()
         for model in models:
             if type(store) == dict:
                 a_store = store[model.getRunId()]
@@ -229,6 +232,11 @@ def _get_remote_trainer(estimator, store, dataset_idx, feature_columns, label_co
                                           schema_cols=label_columns + feature_columns,
                                           dataset_idx=dataset_idx)
     estimator._check_params(metadata)
+    print()
+    print()
+    print(metadata)
+    print()
+    print()
     keras_utils = estimator._get_keras_utils()
 
     # Checkpointing the model if it does not exist.
