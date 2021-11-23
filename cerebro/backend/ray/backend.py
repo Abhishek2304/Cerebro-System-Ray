@@ -126,7 +126,7 @@ class RayBackend(Backend):
         for key in ray.available_resources().keys():
             if key[:5] == 'node:':
                 num_machines += 1
-
+        print("CPUS:")
         print(num_cpus)
         print(num_machines)
         raise NotImplementedError
