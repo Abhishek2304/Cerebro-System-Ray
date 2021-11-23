@@ -260,6 +260,9 @@ class RayBackend(Backend):
             for k in epoch_results[model_id]:
                 epoch_results[model_id][k] = np.average(epoch_results[model_id][k])
 
+        print(epoch_results)
+        raise NotImplementedError
+
         if is_train:
             for model in models:
                 if model.getEpochs() is None:
