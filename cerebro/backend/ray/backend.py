@@ -37,12 +37,20 @@ class Worker(object):
     
     def execute_subepoch(self, fn, data_shard, is_train, initial_epoch):
 
-        data_shard = data_shard.to_pandas()
+        data_shard = data_shard.to_pandas(limit = data_shard.count())
         target = data_shard.pop('label')
         data_np = np.array([arr.tolist().pop() for arr in np.asarray(data_shard)]).astype('float64')
         data = tf.convert_to_tensor(data_np)
         target = tf.convert_to_tensor(np.asarray(target))
 
+        print()
+        print(data.show())
+        print(target.show())
+        print(data.count())
+        print(target.count())
+        print()
+
+        raise NotImplementedError
         try:
             self.completion_status = False
             result, _ = fn(data, target, is_train, initial_epoch)
