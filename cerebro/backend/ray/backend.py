@@ -227,10 +227,14 @@ class RayBackend(Backend):
         while not exit_event.is_set() and len(Q) > 0:
             for j in range(self.settings.num_workers):
                 if worker_idle[j]:
-                    result = place_model_on_worker(j)
-                    print()
-                    print(result)
-                    print()
+                    result_this = place_model_on_worker(j)
+                    model_id = models[model_on_worker[j]].getRunID()
+                    for k in result_this.keys():
+                        if k in epoch_results[model_id]:
+                            epoch_results[model_id][k] = epoch_results[model_id][k].append(result_this[k])
+                        else:
+                            epoch_results[model_id][k] = result_this[k]
+                    
                 elif ray.get(self.workers[j].get_completion_status.remote()):
                     i = model_on_worker[j]
                     Q.remove((i, j))
@@ -240,14 +244,18 @@ class RayBackend(Backend):
                     model_idle[i] = True
                     worker_idle[j] = True
                     model_on_worker[j] = -1
-                    result = place_model_on_worker(j)
-                    print()
-                    print(result)
-                    print()
-                
+                    result_this = place_model_on_worker(j)
+                    model_id = models[model_on_worker[j]].getRunID()
+                    for k in result_this.keys():
+                        if k in epoch_results[model_id]:
+                            epoch_results[model_id][k] = epoch_results[model_id][k].append(result_this[k])
+                        else:
+                            epoch_results[model_id][k] = result_this[k]
+                    
             exit_event.wait(self.settings.polling_period)
         
-        return {}
+        print(epoch_results)
+        return epoch_results
 
 
 def _get_remote_trainer(estimator, store, dataset_idx, feature_columns, label_columns):
