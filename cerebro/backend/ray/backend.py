@@ -36,19 +36,13 @@ class Worker(object):
         return self.completion_status
     
     def execute_subepoch(self, fn, data_shard, is_train, initial_epoch):
-        print()
-        print()
 
         data_shard = data_shard.to_pandas()
-        print(len(data_shard))
         target = data_shard.pop('label')
         data_np = np.array([arr.tolist().pop() for arr in np.asarray(data_shard)]).astype('float64')
         data = tf.convert_to_tensor(data_np)
-        print(data)
-        # print('Target')
         target = tf.convert_to_tensor(np.asarray(target))
-        # print(target)
-        
+
         try:
             self.completion_status = False
             fn(data, target, is_train, initial_epoch)
@@ -278,8 +272,6 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
     store = estimator.store # TODO:Check if you need to use the Ray store instead
     remote_store = store.to_remote(run_id, dataset_idx) # TODO: Check if you need to use the Ray store instead
 
-
-
     def train(x_data, y_data, is_train, starting_epoch, local_task_index=0):
 
         begin_time = time.time()
@@ -320,6 +312,9 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
                 initialization_time = time.time() - begin_time
                 begin_time = time.time()
                 result = fit_sub_epoch_fn(starting_epoch, model, x_data, y_data, callbacks, verbose).history
+                # print()
+                # print()
+                # print(result)
                 training_time = time.time() - begin_time
                 begin_time = time.time()
                 result = {'train_' + name: result[name] for name in result}
