@@ -33,13 +33,13 @@ class TFKerasUtil(object):
 
     @staticmethod
     def fit_sub_epoch_fn():
-        def fn(starting_epoch, model, train_data, target_data, callbacks, verbose):
+        def fn(starting_epoch, model, train_data, target_data, callbacks):
             return model.fit(
                 x = train_data,
                 y = target_data,
                 initial_epoch=starting_epoch,
                 callbacks=callbacks,
-                verbose=verbose,
+                verbose=2,
                 epochs=starting_epoch + 1)
 
         return fn

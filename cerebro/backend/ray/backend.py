@@ -311,10 +311,12 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
             if is_train:
                 initialization_time = time.time() - begin_time
                 begin_time = time.time()
-                result = fit_sub_epoch_fn(starting_epoch, model, x_data, y_data, callbacks, verbose).history
-                # print()
-                # print()
-                # print(result)
+                result = fit_sub_epoch_fn(starting_epoch, model, x_data, y_data, callbacks).history
+                print()
+                print()
+                print(result)
+                print()
+                print()
                 training_time = time.time() - begin_time
                 begin_time = time.time()
                 result = {'train_' + name: result[name] for name in result}
