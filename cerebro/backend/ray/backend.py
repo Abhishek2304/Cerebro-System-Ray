@@ -119,6 +119,9 @@ class RayBackend(Backend):
         self.data_loaders_initialized = False
         self.train_shards = None
         self.val_shards = None
+        print()
+        print(ray.available_resources())
+        raise NotImplementedError
         self.cpus_per_worker = (ray.available_resources()['CPU'] - 4)/self.settings.num_workers if \
                                 (ray.available_resources()['CPU'] > 4) else 1
 
