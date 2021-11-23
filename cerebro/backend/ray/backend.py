@@ -229,7 +229,6 @@ class RayBackend(Backend):
             for j in range(self.settings.num_workers):
                 if worker_idle[j]:
                     result_ref = place_model_on_worker(j)
-                    result_refs[models[model_on_worker[j]].getRunId()].append(result_ref)
                     if result_ref is not None:
                         result_refs[models[model_on_worker[j]].getRunId()].append(result_ref)
                     # result_this = ray.get(result_ref)
