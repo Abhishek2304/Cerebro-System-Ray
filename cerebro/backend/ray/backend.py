@@ -266,7 +266,12 @@ class RayBackend(Backend):
                     else:
                         epoch_results[model_id][k] = result_this[k]
 
-        print(epoch_results)
+        if is_train:
+            for model in models:
+                if model.getEpochs() is None:
+                    model.setEpoch(1)
+                else:
+                    model.setEpoch(model.getEpochs() + 1)
 
         return epoch_results
 
