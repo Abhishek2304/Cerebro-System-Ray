@@ -262,7 +262,7 @@ class RayBackend(Backend):
                 result_this = ray.get(ref)
                 for k in result_this.keys():
                     if k in epoch_results[model_id]:
-                        epoch_results[model_id][k].append(result_this[k])
+                        epoch_results[model_id][k].extend(result_this[k])
                     else:
                         epoch_results[model_id][k] = result_this[k]
 
