@@ -107,7 +107,7 @@ def main():
     # "batch_size": hp_choice([32, 64, 256, 512]),
     }
 
-    model_selection = GridSearch(backend, store, estimator_gen_fn, param_grid_criteo, 1, evaluation_metric='acc',
+    model_selection = GridSearch(backend, store, estimator_gen_fn, param_grid_criteo, 5, evaluation_metric='acc',
                         feature_columns=['features'], label_columns=['label'], verbose = 0)
     model = model_selection.fit_on_prepared_data()
     print(model.get_all_model_history())
