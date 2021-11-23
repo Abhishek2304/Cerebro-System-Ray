@@ -221,16 +221,14 @@ class RayBackend(Backend):
                     if is_train: data_shard = self.train_shards[j]
                     else: data_shard = self.val_shards[j]
                     result_ref = self.workers[j].execute_subepoch.remote(sub_epoch_trainers[i], data_shard, is_train, models[i].epoch)
-                    print("Result_ref:")
-                    print(result_ref)
-                    print("Ray get:")
-                    print(ray.get(result_ref))
                     return ray.get(result_ref)
 
         while not exit_event.is_set() and len(Q) > 0:
             for j in range(self.settings.num_workers):
                 if worker_idle[j]:
                     result_this = place_model_on_worker(j)
+                    print("result_this:")
+                    print(result_this)
                     model_id = models[model_on_worker[j]].getRunId()
                     for k in result_this.keys():
                         if k in epoch_results[model_id]:
@@ -248,6 +246,8 @@ class RayBackend(Backend):
                     worker_idle[j] = True
                     model_on_worker[j] = -1
                     result_this = place_model_on_worker(j)
+                    print("result_this:")
+                    print(result_this)
                     model_id = models[model_on_worker[j]].getRunId()
                     for k in result_this.keys():
                         if k in epoch_results[model_id]:
