@@ -29,7 +29,7 @@ def define_model(lr, lambda_regularizer):
                     setattr(layer_initializer, 'seed', SEED)
 
     optimizer = keras.optimizers.Adam(lr=lr)
-    loss = keras.losses.SparseCategoricalCrossentropy()
+    loss = keras.losses.BinaryCrossentropy()
     # loss = 'categorical_crossentropy'
     metrics = ['acc']
 
@@ -45,7 +45,7 @@ def main():
     train_tar = train_df.pop('label')
     np_train = np.array([arr.tolist().pop() for arr in np.asarray(train_df)]).astype('float64')
     train_data = tf.convert_to_tensor(np_train)
-    train_tar = tf.convert_to_tensor(np.asarray(train_tar).astype('float64'))
+    train_tar = tf.convert_to_tensor(np.asarray(train_tar))
 
     val_df = pd.read_parquet("/proj/orion-PG0/rayCriteoDataset/val_data.parquet")
     val_tar = val_df.pop('label')
