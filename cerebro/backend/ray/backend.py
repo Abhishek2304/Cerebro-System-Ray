@@ -45,8 +45,9 @@ class Worker(object):
 
         try:
             self.completion_status = False
-            fn(data, target, is_train, initial_epoch)
+            result, _ = fn(data, target, is_train, initial_epoch)
             self.completion_status = True
+
         except Exception as e:
             self.completion_status = True
             print(str(e) + "\n" + traceback.format_exc())
@@ -176,7 +177,7 @@ class RayBackend(Backend):
             print('CEREBRO => Time: {}, Starting EPOCH {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), mode))
         
         sub_epoch_trainers = []
-        
+        epoch_results = {}
         for model in models:
             if type(store) == dict:
                 a_store = store[model.getRunId()]
@@ -192,22 +193,24 @@ class RayBackend(Backend):
                 a_label_col = label_cols[model.getRunId()]
             else:
                 a_label_col = label_cols
+
+            # epoch_results[model.getRunId()] = None
             
             sub_epoch_trainers.append(_get_remote_trainer(model, a_store, None, a_feature_col, a_label_col))
 
+        
         Q = [(i, j) for i in range(len(models)) for j in range(self.settings.num_workers)]
         random.shuffle(Q)
-        print()
-        print()
-        print(Q)
-        print()
-        print()
+        # print()
+        # print()
+        # print(Q)
+        # print()
+        # print()
         model_idle = [True for _ in range(len(models))]
         worker_idle = [True for _ in range(self.settings.num_workers)]
         model_on_worker = [-1 for _ in range(self.settings.num_workers)]
 
         def place_model_on_worker(j):
-            # random.shuffle(Q) # TODO: Is this needed?
             for idx, s in enumerate(Q):
                 i, j_prime = s
                 if j_prime == j and model_idle[i]:
@@ -226,15 +229,17 @@ class RayBackend(Backend):
                 elif ray.get(self.workers[j].get_completion_status.remote()):
                     i = model_on_worker[j]
                     Q.remove((i, j))
-                    print()
-                    print(Q)
-                    print()
+                    # print()
+                    # print(Q)
+                    # print()
                     model_idle[i] = True
                     worker_idle[j] = True
                     model_on_worker[j] = -1
                     place_model_on_worker(j)
                 
             exit_event.wait(self.settings.polling_period)
+        
+        return {}
 
 
 def _get_remote_trainer(estimator, store, dataset_idx, feature_columns, label_columns):
@@ -303,13 +308,13 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
             if user_callbacks is not None:
                 callbacks = callbacks + user_callbacks
             ckpt_file = os.path.join(run_output_dir, remote_store.checkpoint_filename) ## TODO: Check if using Ray store instead of physical store.
-            print(ckpt_file)
+            # print(ckpt_file)
             # restoring the model from the previous checkpoint #TODO: Check what to do for Ray Store
             # with tf.keras.utils.custom_object_scope(custom_objects):
             #     model = deserialize_keras_model(
             #         remote_store.get_last_checkpoint(), lambda x: tf.keras.models.load_model(x))
             
-            print(remote_store.get_last_checkpoint)
+            # print(remote_store.get_last_checkpoint)
             model = deserialize_keras_model(
                 remote_store.get_last_checkpoint(), lambda x: tf.keras.models.load_model(x))
             
