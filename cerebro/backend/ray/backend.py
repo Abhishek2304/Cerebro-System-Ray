@@ -250,7 +250,8 @@ class RayBackend(Backend):
                     worker_idle[j] = True
                     model_on_worker[j] = -1
                     result_ref = place_model_on_worker(j)
-                    result_refs[models[model_on_worker[j]].getRunId()].append(result_ref)
+                    if result_ref is not None:
+                        result_refs[models[model_on_worker[j]].getRunId()].append(result_ref)
                     
             exit_event.wait(self.settings.polling_period)
         
