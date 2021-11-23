@@ -19,3 +19,4 @@ pip3 install -U 'ray[default]'
 pip3 install ray[data]
 pip3 install pandas==1.1.0
 pip3 install pickle5==0.0.10
+pip3 insstall tensorflow-io
