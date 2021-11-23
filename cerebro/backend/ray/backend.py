@@ -247,6 +247,8 @@ class RayBackend(Backend):
                     worker_idle[j] = True
                     model_on_worker[j] = -1
                     result_ref = place_model_on_worker(j)
+                    print("result_ref")
+                    print(result_ref)
                     result_this = ray.get(result_ref)
                     print("result_this:")
                     print(result_this)
