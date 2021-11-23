@@ -122,9 +122,6 @@ class RayBackend(Backend):
         self.cpus_per_worker = (ray.available_resources()['CPU'] - 4)/self.settings.num_workers if \
                                 (ray.available_resources()['CPU'] > 4) else 1
 
-        print(self.cpus_per_worker)
-        raise NotImplementedError
-
         # Add self.num_data_readers if it is different from num_workers
 
     def _num_workers(self):
@@ -133,7 +130,8 @@ class RayBackend(Backend):
     def initialize_workers(self):
 
         num_workers = self._num_workers()
-        self.workers = [Worker.options(name = str(i), lifetime = "detached").remote() for i in range(num_workers)]
+        self.workers = [Worker.options(name = str(i), lifetime = "detached", num_cpus = self.cpus_per_worker).remote() \
+                        for i in range(num_workers)]
         self.workers_initialized = True
 
     def initialize_data_loaders(self, store, schema_Fields=None, dataset_idx=None):
