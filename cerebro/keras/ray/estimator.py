@@ -64,6 +64,7 @@ class RayEstimator(CerebroEstimator):
         self.transformation_fn = transformation_fn
         self.verbose = verbose
         self.hparams = None
+        self.history = None
 
         run_id = 'model_' + str(next_model_id()) + '_' + str(int(time.time()))
         self.run_id = run_id
@@ -80,8 +81,11 @@ class RayEstimator(CerebroEstimator):
     def setEpoch(self, epoch):
         self.epoch = epoch
 
-    def setLossWeights (self, weights):
+    def setLossWeights(self, weights):
         self.loss_weights = weights
+    
+    def setHistory(self, history):
+        self.history = history
 
     def setFeatureCols(self,feature_cols):
         self.feature_cols = feature_cols
@@ -103,6 +107,9 @@ class RayEstimator(CerebroEstimator):
 
     def getFeatureCols(self):
         return self.feature_cols
+
+    def getHistory(self):
+        return self.history
 
     def getLabelCols(self):
         return self.label_cols
