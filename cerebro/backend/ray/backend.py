@@ -47,7 +47,7 @@ class Worker(object):
             self.completion_status = False
             result, _ = fn(data, target, is_train, initial_epoch)
             self.completion_status = True
-
+            print(result)
             return result
 
         except Exception as e:
