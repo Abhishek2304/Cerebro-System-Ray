@@ -103,7 +103,10 @@ class RayBackend(Backend):
         
         # If num_workers not given, set the workers to approx cores/16.
         if num_workers is None:
-            num_workers = int((ray.available_resources()['CPU'] - 4)//16) if (ray.available_resources()['CPU'] > 4) else 1
+            num_workers = 0
+            for key in ray.available_resources().keys():
+            if key[:5] == 'node:':
+                num_workers += 1
             if settings.verbose >= 1:
                 print('CEREBRO => Time: {}, Running {} Workers (set a default of cores - 1)'.format(
                     datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), num_workers))
@@ -119,19 +122,14 @@ class RayBackend(Backend):
         self.data_loaders_initialized = False
         self.train_shards = None
         self.val_shards = None
-        print()
-        print(ray.available_resources())
         num_cpus = ray.available_resources()['CPU']
         num_machines = 0
         for key in ray.available_resources().keys():
             if key[:5] == 'node:':
                 num_machines += 1
         num_machines = float(num_machines)
-        print(num_cpus)
-        print(num_machines)
-        raise NotImplementedError
-        self.cpus_per_worker = (ray.available_resources()['CPU'] - 4)/self.settings.num_workers if \
-                                (ray.available_resources()['CPU'] > 4) else 1
+        
+        self.cpus_per_worker = num_cpus/num_machines
 
         # Add self.num_data_readers if it is different from num_workers
 
