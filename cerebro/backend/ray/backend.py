@@ -228,7 +228,7 @@ class RayBackend(Backend):
             for j in range(self.settings.num_workers):
                 if worker_idle[j]:
                     result_this = place_model_on_worker(j)
-                    model_id = models[model_on_worker[j]].getRunID()
+                    model_id = models[model_on_worker[j]].getRunId()
                     for k in result_this.keys():
                         if k in epoch_results[model_id]:
                             epoch_results[model_id][k] = epoch_results[model_id][k].append(result_this[k])
@@ -245,7 +245,7 @@ class RayBackend(Backend):
                     worker_idle[j] = True
                     model_on_worker[j] = -1
                     result_this = place_model_on_worker(j)
-                    model_id = models[model_on_worker[j]].getRunID()
+                    model_id = models[model_on_worker[j]].getRunId()
                     for k in result_this.keys():
                         if k in epoch_results[model_id]:
                             epoch_results[model_id][k] = epoch_results[model_id][k].append(result_this[k])
