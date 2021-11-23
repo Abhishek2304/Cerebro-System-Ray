@@ -105,8 +105,8 @@ class RayBackend(Backend):
         if num_workers is None:
             num_workers = 0
             for key in ray.available_resources().keys():
-            if key[:5] == 'node:':
-                num_workers += 1
+                if key[:5] == 'node:':
+                    num_workers += 1
             if settings.verbose >= 1:
                 print('CEREBRO => Time: {}, Running {} Workers (set a default of cores - 1)'.format(
                     datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), num_workers))
