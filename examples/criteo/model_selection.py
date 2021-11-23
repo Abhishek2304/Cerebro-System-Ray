@@ -111,11 +111,13 @@ def main():
                         feature_columns=['features'], label_columns=['label'])
     model = model_selection.fit_on_prepared_data()
     print(model)
-    print(model.get_best_model_history())
+    print(model.get_all_model_history())
 
 if __name__ == "__main__":
+    begin_time = time.time()
     main()
-
+    print("Time for Cerebro Ray:")
+    print(time.time() - begin_time)
 
 
 
