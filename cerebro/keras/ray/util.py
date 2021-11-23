@@ -33,9 +33,10 @@ class TFKerasUtil(object):
 
     @staticmethod
     def fit_sub_epoch_fn():
-        def fn(starting_epoch, model, train_data, callbacks, verbose):
+        def fn(starting_epoch, model, train_data, target_data, callbacks, verbose):
             return model.fit(
-                train_data,
+                x = train_data,
+                y = target_data,
                 initial_epoch=starting_epoch,
                 callbacks=callbacks,
                 verbose=verbose,
@@ -45,8 +46,8 @@ class TFKerasUtil(object):
 
     @staticmethod
     def eval_sub_epoch_fn():
-        def fn(_, model, val_data, callbacks, verbose):
-            return model.evaluate(val_data, callbacks=callbacks, verbose=verbose)
+        def fn(_, model, val_data, target_data, callbacks, verbose):
+            return model.evaluate(x = val_data, y = target_data, callbacks=callbacks, verbose=verbose)
 
         return fn
 

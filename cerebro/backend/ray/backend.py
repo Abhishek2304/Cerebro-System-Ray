@@ -51,7 +51,7 @@ class Worker(object):
         
         try:
             self.completion_status = False
-            fn(data, is_train, initial_epoch)
+            fn(data, target, is_train, initial_epoch)
             self.completion_status = True
         except Exception as e:
             self.completion_status = True
@@ -280,7 +280,7 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
 
 
 
-    def train(data_shard, is_train, starting_epoch, local_task_index=0):
+    def train(x_data, y_data, is_train, starting_epoch, local_task_index=0):
 
         begin_time = time.time()
 
@@ -319,7 +319,7 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
             if is_train:
                 initialization_time = time.time() - begin_time
                 begin_time = time.time()
-                result = fit_sub_epoch_fn(starting_epoch, model, data_shard, callbacks, verbose).history
+                result = fit_sub_epoch_fn(starting_epoch, model, x_data, y_data, callbacks, verbose).history
                 training_time = time.time() - begin_time
                 begin_time = time.time()
                 result = {'train_' + name: result[name] for name in result}
@@ -327,7 +327,7 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
             else:
                 initialization_time = time.time() - begin_time
                 begin_time = time.time()
-                result = eval_sub_epoch_fn(starting_epoch, model, data_shard, callbacks, verbose)
+                result = eval_sub_epoch_fn(starting_epoch, model, x_data, y_data, callbacks, verbose)
                 training_time = time.time() - begin_time
                 begin_time = time.time()
                 result = [[x] for x in result]
