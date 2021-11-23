@@ -64,7 +64,6 @@ class RayEstimator(CerebroEstimator):
         self.transformation_fn = transformation_fn
         self.verbose = verbose
         self.hparams = None
-        self.history = None
 
         run_id = 'model_' + str(next_model_id()) + '_' + str(int(time.time()))
         self.run_id = run_id
@@ -83,9 +82,6 @@ class RayEstimator(CerebroEstimator):
 
     def setLossWeights(self, weights):
         self.loss_weights = weights
-    
-    def setHistory(self, history):
-        self.history = history
 
     def setFeatureCols(self,feature_cols):
         self.feature_cols = feature_cols
@@ -107,9 +103,6 @@ class RayEstimator(CerebroEstimator):
 
     def getFeatureCols(self):
         return self.feature_cols
-
-    def getHistory(self):
-        return self.history
 
     def getLabelCols(self):
         return self.label_cols
@@ -198,7 +191,6 @@ class RayEstimator(CerebroEstimator):
         floatx = keras_module.backend.floatx()
         custom_objects = self.custom_objects
         serialized_model = self._load_model_from_checkpoint(run_id)
-        self.history = history
 
         def load_model_fn(x):
             if custom_objects is None:
@@ -261,6 +253,9 @@ class RayModel(CerebroModel):
 
     def getCustomObjects(self):
         return self.custom_objects
+
+    def getHistory(self):
+        return self.history
 
     def keras(self):
         """ Returns the trained model in Keras format.
