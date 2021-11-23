@@ -197,7 +197,11 @@ class RayBackend(Backend):
 
         Q = [(i, j) for i in range(len(models)) for j in range(self.settings.num_workers)]
         random.shuffle(Q)
-        
+        print()
+        print()
+        print(Q)
+        print()
+        print()
         model_idle = [True for _ in range(len(models))]
         worker_idle = [True for _ in range(self.settings.num_workers)]
         model_on_worker = [-1 for _ in range(self.settings.num_workers)]
@@ -222,6 +226,9 @@ class RayBackend(Backend):
                 elif ray.get(self.workers[j].get_completion_status.remote()):
                     i = model_on_worker[j]
                     Q.remove((i, j))
+                    print()
+                    print(Q)
+                    print()
                     model_idle[i] = True
                     worker_idle[j] = True
                     model_on_worker[j] = -1
@@ -312,11 +319,6 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
                 initialization_time = time.time() - begin_time
                 begin_time = time.time()
                 result = fit_sub_epoch_fn(starting_epoch, model, x_data, y_data, callbacks).history
-                print()
-                print()
-                print(result)
-                print()
-                print()
                 training_time = time.time() - begin_time
                 begin_time = time.time()
                 result = {'train_' + name: result[name] for name in result}
