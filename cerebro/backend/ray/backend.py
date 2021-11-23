@@ -39,15 +39,15 @@ class Worker(object):
 
         data_shard = data_shard.to_pandas(limit = data_shard.count())
         target = data_shard.pop('label')
+        print()
+        print(data_shard.count())
         data_np = np.array([arr.tolist().pop() for arr in np.asarray(data_shard)]).astype('float64')
         data = tf.convert_to_tensor(data_np)
         target = tf.convert_to_tensor(np.asarray(target))
 
         print()
-        print(data.show())
-        print(target.show())
-        print(data.count())
-        print(target.count())
+        print(data)
+        print(target)
         print()
 
         raise NotImplementedError
