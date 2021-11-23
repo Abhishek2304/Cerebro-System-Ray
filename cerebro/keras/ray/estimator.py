@@ -80,6 +80,9 @@ class RayEstimator(CerebroEstimator):
     def setEpoch(self, epoch):
         self.epoch = epoch
 
+    def getEpochs(self):
+        return self.epoch
+
     def setLossWeights (self, weights):
         self.loss_weights = weights
 
