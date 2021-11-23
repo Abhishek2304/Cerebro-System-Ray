@@ -99,6 +99,15 @@ class RayBackend(Backend):
                                         disk_cache_size_bytes = None,
                                         data_readers_pool_type = data_readers_pool_type,
                                         nics = None) 
+
+        print()
+        print()
+        print("Total resources")
+        print(ray.cluster_resources())
+        print("Available resources")
+        print(ray.available_resources())
+        raise NotImplementedError
+
         
         # If num_workers not given, use psutil to set the workers to cores - 1.
         if num_workers is None:
