@@ -38,6 +38,7 @@ def define_model(lr, lambda_regularizer):
 
 def main():
 
+    histories = []
     lrs = [1e-3, 1e-4]
     lambdas = [1e-4, 1e-5]
 
@@ -58,9 +59,12 @@ def main():
 
             model, loss, optimizer, metrics = define_model(lr, lambda_regularizer)
             model.compile(optimizer = optimizer, loss = loss, metrics = metrics)
-            history = model.fit(train_data, train_tar, batch_size = 64, epochs = 1, validation_data = (val_data, val_tar))
+            history = model.fit(train_data, train_tar, batch_size = 64, epochs = 5, validation_data = (val_data, val_tar))
 
-            print(history.history)
+            histories.append(history.history)
+
+    for history in histories:
+        print(history)
 
 if __name__ == "__main__":
     

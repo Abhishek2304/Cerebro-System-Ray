@@ -129,10 +129,7 @@ class RayBackend(Backend):
                 num_machines += 1
         num_machines = float(num_machines)
         
-        print(num_cpus)
-        print(num_machines)
         self.cpus_per_worker = num_cpus/num_machines
-        print(self.cpus_per_worker)
 
         # Add self.num_data_readers if it is different from num_workers
 
