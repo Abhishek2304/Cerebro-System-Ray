@@ -142,6 +142,7 @@ class RayBackend(Backend):
     def initialize_workers(self):
 
         num_workers = self._num_workers()
+        print(self.cpus_per_worker)
         self.workers = [Worker.options(name = str(i), lifetime = "detached", num_cpus = self.cpus_per_worker).remote() \
                         for i in range(num_workers)]
         self.workers_initialized = True
