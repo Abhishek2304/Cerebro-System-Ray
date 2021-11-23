@@ -303,12 +303,13 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
             if user_callbacks is not None:
                 callbacks = callbacks + user_callbacks
             ckpt_file = os.path.join(run_output_dir, remote_store.checkpoint_filename) ## TODO: Check if using Ray store instead of physical store.
-
+            print(ckpt_file)
             # restoring the model from the previous checkpoint #TODO: Check what to do for Ray Store
             # with tf.keras.utils.custom_object_scope(custom_objects):
             #     model = deserialize_keras_model(
             #         remote_store.get_last_checkpoint(), lambda x: tf.keras.models.load_model(x))
             
+            print(remote_store.get_last_checkpoint)
             model = deserialize_keras_model(
                 remote_store.get_last_checkpoint(), lambda x: tf.keras.models.load_model(x))
             
