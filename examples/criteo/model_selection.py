@@ -19,7 +19,7 @@ def estimator_gen_fn(params): # lr, lambda_value
     lr = params["lr"]
     lambda_regularizer = params["lambda_value"]
 
-    INPUT_SHAPE_CRITEO = (7306, )
+    INPUT_SHAPE_CRITEO = (13, )
     NUM_CLASSES_CRITEO = 2
     SEED = 2021
 

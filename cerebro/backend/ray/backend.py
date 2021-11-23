@@ -51,7 +51,7 @@ class Worker(object):
         
         try:
             self.completion_status = False
-            fn(data_shard, is_train, initial_epoch)
+            fn(data, is_train, initial_epoch)
             self.completion_status = True
         except Exception as e:
             self.completion_status = True
