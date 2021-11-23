@@ -20,7 +20,7 @@ def estimator_gen_fn(params): # lr, lambda_value
     lambda_regularizer = params["lambda_value"]
 
     INPUT_SHAPE_CRITEO = (13, )
-    NUM_CLASSES_CRITEO = 2
+    NUM_CLASSES_CRITEO = 1
     SEED = 2021
 
     model = keras.models.Sequential()
