@@ -100,18 +100,10 @@ class RayBackend(Backend):
                                         data_readers_pool_type = data_readers_pool_type,
                                         nics = None) 
 
-        print()
-        print()
-        print("Total resources")
-        print(ray.cluster_resources())
-        print("Available resources")
-        print(ray.available_resources())
-        raise NotImplementedError
-
         
-        # If num_workers not given, use psutil to set the workers to cores - 1.
+        # If num_workers not given, set the workers to approx cores/16.
         if num_workers is None:
-            num_workers = psutil.cpu_count() - 1
+            num_workers = int((ray.available_resources()['CPU'] - 4)//16) if (ray.available_resources()['CPU'] > 4) else 1
             if settings.verbose >= 1:
                 print('CEREBRO => Time: {}, Running {} Workers (set a default of cores - 1)'.format(
                     datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), num_workers))
@@ -127,6 +119,11 @@ class RayBackend(Backend):
         self.data_loaders_initialized = False
         self.train_shards = None
         self.val_shards = None
+        self.cpus_per_worker = (ray.available_resources()['CPU'] - 4)/self.settings.num_workers if \
+                                (ray.available_resources()['CPU'] > 4) else 1
+
+        print(self.cpus_per_worker)
+        raise NotImplementedError
 
         # Add self.num_data_readers if it is different from num_workers
 
