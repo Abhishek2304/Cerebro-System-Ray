@@ -98,10 +98,10 @@ class RayEstimator(CerebroEstimator):
     def setHyperParams(self, params):
         self.hparams = params
 
-     def getEpochs(self):
+    def getEpochs(self):
         return self.epoch
 
-     def getFeatureCols(self):
+    def getFeatureCols(self):
         return self.feature_cols
 
     def getLabelCols(self):
