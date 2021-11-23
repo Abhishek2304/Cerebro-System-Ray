@@ -47,7 +47,6 @@ class Worker(object):
             self.completion_status = False
             result, _ = fn(data, target, is_train, initial_epoch)
             self.completion_status = True
-            print(result)
             return result
 
         except Exception as e:
@@ -222,6 +221,10 @@ class RayBackend(Backend):
                     if is_train: data_shard = self.train_shards[j]
                     else: data_shard = self.val_shards[j]
                     result_ref = self.workers[j].execute_subepoch.remote(sub_epoch_trainers[i], data_shard, is_train, models[i].epoch)
+                    print("Result_ref:")
+                    print(result_ref)
+                    print("Ray get:")
+                    print(ray.get(result_ref))
                     return ray.get(result_ref)
 
         while not exit_event.is_set() and len(Q) > 0:
