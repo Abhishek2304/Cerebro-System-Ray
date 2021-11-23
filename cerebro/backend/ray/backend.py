@@ -179,6 +179,7 @@ class RayBackend(Backend):
         
         sub_epoch_trainers = []
         epoch_results = {}
+        result_refs = {}
         for model in models:
             if type(store) == dict:
                 a_store = store[model.getRunId()]
@@ -196,6 +197,7 @@ class RayBackend(Backend):
                 a_label_col = label_cols
 
             epoch_results[model.getRunId()] = {}
+            result_refs[model.getRunId()] = []
             
             sub_epoch_trainers.append(_get_remote_trainer(model, a_store, None, a_feature_col, a_label_col))
 
@@ -227,15 +229,16 @@ class RayBackend(Backend):
             for j in range(self.settings.num_workers):
                 if worker_idle[j]:
                     result_ref = place_model_on_worker(j)
-                    result_this = ray.get(result_ref)
-                    print("result_this:")
-                    print(result_this)
-                    model_id = models[model_on_worker[j]].getRunId()
-                    for k in result_this.keys():
-                        if k in epoch_results[model_id]:
-                            epoch_results[model_id][k] = epoch_results[model_id][k].append(result_this[k])
-                        else:
-                            epoch_results[model_id][k] = result_this[k]
+                    result_refs[models[model_on_worker[j]].getRunId()].append(result_ref)
+                    # result_this = ray.get(result_ref)
+                    # print("result_this:")
+                    # print(result_this)
+                    # model_id = models[model_on_worker[j]].getRunId()
+                    # for k in result_this.keys():
+                    #     if k in epoch_results[model_id]:
+                    #         epoch_results[model_id][k] = epoch_results[model_id][k].append(result_this[k])
+                    #     else:
+                    #         epoch_results[model_id][k] = result_this[k]
                     
                 elif ray.get(self.workers[j].get_completion_status.remote()):
                     i = model_on_worker[j]
@@ -247,21 +250,11 @@ class RayBackend(Backend):
                     worker_idle[j] = True
                     model_on_worker[j] = -1
                     result_ref = place_model_on_worker(j)
-                    print("result_ref")
-                    print(result_ref)
-                    result_this = ray.get(result_ref)
-                    print("result_this:")
-                    print(result_this)
-                    model_id = models[model_on_worker[j]].getRunId()
-                    for k in result_this.keys():
-                        if k in epoch_results[model_id]:
-                            epoch_results[model_id][k] = epoch_results[model_id][k].append(result_this[k])
-                        else:
-                            epoch_results[model_id][k] = result_this[k]
+                    result_refs[models[model_on_worker[j]].getRunId()].append(result_ref)
                     
             exit_event.wait(self.settings.polling_period)
         
-        print(epoch_results)
+        print(result_refs)
         return epoch_results
 
 
