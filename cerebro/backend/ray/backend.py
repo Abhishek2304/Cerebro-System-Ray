@@ -121,6 +121,14 @@ class RayBackend(Backend):
         self.val_shards = None
         print()
         print(ray.available_resources())
+        num_cpus = ray.available_resources()['CPU']
+        num_machines = 0
+        for key in ray.available_resources().keys():
+            if key[:5] == 'node:':
+                num_machines += 1
+
+        print(num_cpus)
+        print(num_machines)
         raise NotImplementedError
         self.cpus_per_worker = (ray.available_resources()['CPU'] - 4)/self.settings.num_workers if \
                                 (ray.available_resources()['CPU'] > 4) else 1
