@@ -80,9 +80,6 @@ class RayEstimator(CerebroEstimator):
     def setEpoch(self, epoch):
         self.epoch = epoch
 
-    def getEpochs(self):
-        return self.epoch
-
     def setLossWeights (self, weights):
         self.loss_weights = weights
 
@@ -100,6 +97,15 @@ class RayEstimator(CerebroEstimator):
 
     def setHyperParams(self, params):
         self.hparams = params
+
+     def getEpochs(self):
+        return self.epoch
+
+     def getFeatureCols(self):
+        return self.feature_cols
+
+    def getLabelCols(self):
+        return self.label_cols
     
     def getRunId(self):
         return self.run_id
@@ -197,6 +203,16 @@ class RayEstimator(CerebroEstimator):
 
     def get_model_class(self):
         return RayModel
+
+    def _get_model_kwargs(self, model, history, run_id, metadata, floatx):
+        return dict(history=history,
+                    model=model,
+                    feature_columns=self.getFeatureCols(),
+                    label_columns=self.getLabelCols(),
+                    custom_objects=self.getCustomObjects(),
+                    run_id=run_id,
+                    _metadata=metadata,
+                    _floatx=floatx)
     
     def _has_checkpoint(self, run_id):
         store = self.store
