@@ -273,6 +273,7 @@ class RayBackend(Backend):
                 else:
                     model.setEpoch(model.getEpochs() + 1)
 
+        print(epoch_results)
         return epoch_results
 
 
