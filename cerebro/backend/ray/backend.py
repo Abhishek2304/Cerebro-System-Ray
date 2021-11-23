@@ -231,15 +231,6 @@ class RayBackend(Backend):
                     result_ref = place_model_on_worker(j)
                     if result_ref is not None:
                         result_refs[models[model_on_worker[j]].getRunId()].append(result_ref)
-                    # result_this = ray.get(result_ref)
-                    # print("result_this:")
-                    # print(result_this)
-                    # model_id = models[model_on_worker[j]].getRunId()
-                    # for k in result_this.keys():
-                    #     if k in epoch_results[model_id]:
-                    #         epoch_results[model_id][k] = epoch_results[model_id][k].append(result_this[k])
-                    #     else:
-                    #         epoch_results[model_id][k] = result_this[k]
                     
                 elif ray.get(self.workers[j].get_completion_status.remote()):
                     i = model_on_worker[j]
@@ -352,8 +343,14 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
             #         remote_store.get_last_checkpoint(), lambda x: tf.keras.models.load_model(x))
             
             # print(remote_store.get_last_checkpoint)
-            model = deserialize_keras_model(
-                remote_store.get_last_checkpoint(), lambda x: tf.keras.models.load_model(x))
+
+            if custom_objects is None:
+                model = deserialize_keras_model(
+                    remote_store.get_last_checkpoint(), lambda x: tf.keras.models.load_model(x))
+            else:
+                with tf.keras.utils.custom_object_scope(custom_objects):
+                    model = deserialize_keras_model(
+                        remote_store.get_last_checkpoint(), lambda x: tf.keras.models.load_model(x))
             
             if starting_epoch is None:
                 starting_epoch = 0

@@ -353,15 +353,8 @@ def log_model_epoch_metrics(model_id, logdir, metrics, step_number, verbose=1):
     :param verbose:log_epoch_metrics_to_tensorboard(estimators, estimator_results, store, verbose)
     """
 
-    print()
-    print()
-    print(metrics)
-    print(step_number)
     with tf.summary.create_file_writer(logdir).as_default():
         for key in metrics:
-            print(key)
-            print(metrics[key])
-            print(metrics[key][step_number-1])
             tf.summary.scalar(key, metrics[key][step_number - 1], step=step_number)
 
     if verbose >= 1:

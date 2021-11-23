@@ -187,6 +187,8 @@ class RayEstimator(CerebroEstimator):
         serialized_model = self._load_model_from_checkpoint(run_id)
 
         def load_model_fn(x):
+            if custom_objects is None:
+                return keras_module.models.load_model(x)
             with keras_module.utils.custom_object_scope(custom_objects):
                 return keras_module.models.load_model(x)
 
