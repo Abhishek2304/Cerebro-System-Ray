@@ -198,6 +198,7 @@ class RayEstimator(CerebroEstimator):
         floatx = keras_module.backend.floatx()
         custom_objects = self.custom_objects
         serialized_model = self._load_model_from_checkpoint(run_id)
+        self.history = history
 
         def load_model_fn(x):
             if custom_objects is None:
