@@ -42,7 +42,7 @@ def estimator_gen_fn(params): # lr, lambda_value
                     setattr(layer_initializer, 'seed', SEED)
 
     optimizer = keras.optimizers.Adam(lr=lr)
-    loss = 'categorical_crossentropy'
+    loss = keras.losses.BinaryCrossentropy()
 
 
     keras_estimator = RayEstimator(
@@ -110,7 +110,6 @@ def main():
     model_selection = GridSearch(backend, store, estimator_gen_fn, param_grid_criteo, 1, evaluation_metric='acc',
                         feature_columns=['features'], label_columns=['label'], verbose = 0)
     model = model_selection.fit_on_prepared_data()
-    print(model)
     print(model.get_all_model_history())
 
 if __name__ == "__main__":
