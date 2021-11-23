@@ -39,7 +39,7 @@ class TFKerasUtil(object):
                 y = target_data,
                 initial_epoch=starting_epoch,
                 callbacks=callbacks,
-                verbose=0,
+                verbose=verbose,
                 epochs=starting_epoch + 1)
 
         return fn

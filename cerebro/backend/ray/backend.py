@@ -48,6 +48,8 @@ class Worker(object):
             result, _ = fn(data, target, is_train, initial_epoch)
             self.completion_status = True
 
+            return result
+
         except Exception as e:
             self.completion_status = True
             print(str(e) + "\n" + traceback.format_exc())
@@ -194,7 +196,7 @@ class RayBackend(Backend):
             else:
                 a_label_col = label_cols
 
-            # epoch_results[model.getRunId()] = None
+            epoch_results[model.getRunId()] = {}
             
             sub_epoch_trainers.append(_get_remote_trainer(model, a_store, None, a_feature_col, a_label_col))
 
@@ -219,13 +221,16 @@ class RayBackend(Backend):
                     model_on_worker[j] = i
                     if is_train: data_shard = self.train_shards[j]
                     else: data_shard = self.val_shards[j]
-                    self.workers[j].execute_subepoch.remote(sub_epoch_trainers[i], data_shard, is_train, models[i].epoch)
-                    break
+                    result_ref = self.workers[j].execute_subepoch.remote(sub_epoch_trainers[i], data_shard, is_train, models[i].epoch)
+                    return ray.get(result_ref)
 
         while not exit_event.is_set() and len(Q) > 0:
             for j in range(self.settings.num_workers):
                 if worker_idle[j]:
-                    place_model_on_worker(j)
+                    result = place_model_on_worker(j)
+                    print()
+                    print(result)
+                    print()
                 elif ray.get(self.workers[j].get_completion_status.remote()):
                     i = model_on_worker[j]
                     Q.remove((i, j))
@@ -235,7 +240,10 @@ class RayBackend(Backend):
                     model_idle[i] = True
                     worker_idle[j] = True
                     model_on_worker[j] = -1
-                    place_model_on_worker(j)
+                    result = place_model_on_worker(j)
+                    print()
+                    print(result)
+                    print()
                 
             exit_event.wait(self.settings.polling_period)
         
