@@ -69,6 +69,8 @@ def train_model(config):
 
     callbacks = [TuneReporterCallback()]
 
+    model.compile(optimizer = optimizer, loss = loss, metrics = metrics)
+
     model.fit(
         train_data, train_tar, 
         validation_data=(val_data, val_tar),
