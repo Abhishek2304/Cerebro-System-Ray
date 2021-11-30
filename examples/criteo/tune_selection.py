@@ -84,7 +84,7 @@ def main():
 
     num_samples = 4
 
-    hyperparameter_space = {"lr": lrs, "lambdas": lambdas}
+    hyperparameter_space = {"lr": tune.choice(lrs), "lambdas": tune.choice(lambdas)}
     ray.init()
     analysis = tune.run(
     train_model,
