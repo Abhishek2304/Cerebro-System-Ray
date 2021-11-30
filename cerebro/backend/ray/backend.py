@@ -35,7 +35,7 @@ class Worker(object):
     def get_completion_status(self):
         return self.completion_status
     
-    def accept_data(data_shard, is_train):
+    def accept_data(self, data_shard, is_train):
         data_shard = data_shard.to_pandas(limit = data_shard.count())
         target = data_shard.pop('label')
         data_np = np.array([arr.tolist().pop() for arr in np.asarray(data_shard)]).astype('float64')
@@ -164,11 +164,11 @@ class RayBackend(Backend):
             
             train_dataset = ray.data.read_parquet(store.get_train_data_path(dataset_idx), parallelism=1000) 
             self.train_shards = train_dataset.split(n=shard_count, equal=True, locality_hints=self.workers)
-            for i, s in enumerate(self.train_shards): self.workers[i].accept_data(s, True).remote()
+            for i, s in enumerate(self.train_shards): self.workers[i].accept_data.remote(s, True)
             
             val_dataset = ray.data.read_parquet(store.get_val_data_path(dataset_idx))
             self.val_shards = val_dataset.split(n=shard_count, equal=True, locality_hints=self.workers)
-            for i, s in enumerate(self.val_shards): self.workers[i].accept_data(s, False).remote()
+            for i, s in enumerate(self.val_shards): self.workers[i].accept_data.remote(s, False)
 
             self.data_loaders_initialized = True
 
