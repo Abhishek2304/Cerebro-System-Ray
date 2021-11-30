@@ -35,31 +35,25 @@ class Worker(object):
     def get_completion_status(self):
         return self.completion_status
     
-    # def accept_data(self, data_shard, is_train):
-    #     data_shard = data_shard.to_pandas(limit = data_shard.count())
-    #     target = data_shard.pop('label')
-    #     data_np = np.array([arr.tolist().pop() for arr in np.asarray(data_shard)]).astype('float64')
-    #     if is_train:
-    #         self.train_data = tf.convert_to_tensor(data_np)
-    #         self.train_target = tf.convert_to_tensor(np.asarray(target))
-    #     else:
-    #         self.val_data = tf.convert_to_tensor(data_np)
-    #         self.val_target = tf.convert_to_tensor(np.asarray(target))
-    
-    def execute_subepoch(self, data_shard, fn, is_train, initial_epoch):
-
-        # if is_train:
-        #     data = self.train_data
-        #     target = self.train_target
-        # else:
-        #     data = self.val_data
-        #     target = self.val_target
-
+    def accept_data(self, data_shard, is_train):
         data_shard = data_shard.to_pandas(limit = data_shard.count())
         target = data_shard.pop('label')
         data_np = np.array([arr.tolist().pop() for arr in np.asarray(data_shard)]).astype('float64')
-        data = tf.convert_to_tensor(data_np)
-        target = tf.convert_to_tensor(np.asarray(target))
+        if is_train:
+            self.train_data = tf.convert_to_tensor(data_np)
+            self.train_target = tf.convert_to_tensor(np.asarray(target))
+        else:
+            self.val_data = tf.convert_to_tensor(data_np)
+            self.val_target = tf.convert_to_tensor(np.asarray(target))
+    
+    def execute_subepoch(self, fn, is_train, initial_epoch):
+
+        if is_train:
+            data = self.train_data
+            target = self.train_target
+        else:
+            data = self.val_data
+            target = self.val_target
 
         try:
             self.completion_status = False
@@ -170,11 +164,11 @@ class RayBackend(Backend):
             
             train_dataset = ray.data.read_parquet(store.get_train_data_path(dataset_idx), parallelism=1000) 
             self.train_shards = train_dataset.split(n=shard_count, equal=True, locality_hints=self.workers)
-            # for i, s in enumerate(self.train_shards): self.workers[i].accept_data.remote(s, True)
+            for i, s in enumerate(self.train_shards): self.workers[i].accept_data.remote(s, True)
             
             val_dataset = ray.data.read_parquet(store.get_val_data_path(dataset_idx))
             self.val_shards = val_dataset.split(n=shard_count, equal=True, locality_hints=self.workers)
-            # for i, s in enumerate(self.val_shards): self.workers[i].accept_data.remote(s, False)
+            for i, s in enumerate(self.val_shards): self.workers[i].accept_data.remote(s, False)
 
             self.data_loaders_initialized = True
 
@@ -255,9 +249,9 @@ class RayBackend(Backend):
                     worker_idle[j] = False
                     model_on_worker[j] = i
                     if is_train:
-                        result_ref = self.workers[j].execute_subepoch.remote(self.train_shards[j], sub_epoch_trainers[i], is_train, models[i].epoch)
+                        result_ref = self.workers[j].execute_subepoch.remote(sub_epoch_trainers[i], is_train, models[i].epoch)
                     else:
-                        result_ref = self.workers[j].execute_subepoch.remote(self.val_shards[j], sub_epoch_trainers[i], is_train, models[i].epoch)
+                        result_ref = self.workers[j].execute_subepoch.remote(sub_epoch_trainers[i], is_train, models[i].epoch)
                     return result_ref
 
         while not exit_event.is_set() and len(Q) > 0:
