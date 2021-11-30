@@ -65,7 +65,7 @@ def train_model(config):
     val_data = tf.convert_to_tensor(np_val)
     val_tar = tf.convert_to_tensor(np.asarray(val_tar))
 
-    model, loss, optimizer, metrics = create_model(config["lr"], config["lambdas"])
+    model, loss, optimizer, metrics = define_model(config["lr"], config["lambdas"])
 
     callbacks = [TuneReporterCallback()]
 
