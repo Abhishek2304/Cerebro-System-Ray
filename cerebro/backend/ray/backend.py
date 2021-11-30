@@ -255,9 +255,9 @@ class RayBackend(Backend):
                     worker_idle[j] = False
                     model_on_worker[j] = i
                     if is_train:
-                        result_ref = self.workers[j].execute_subepoch.remote(sub_epoch_trainers[i], self.train_shards[j], is_train, models[i].epoch)
+                        result_ref = self.workers[j].execute_subepoch.remote(self.train_shards[j], sub_epoch_trainers[i], is_train, models[i].epoch)
                     else:
-                        result_ref = self.workers[j].execute_subepoch.remote(sub_epoch_trainers[i], self.val_shards[j], is_train, models[i].epoch)
+                        result_ref = self.workers[j].execute_subepoch.remote(self.val_shards[j], sub_epoch_trainers[i], is_train, models[i].epoch)
                     return result_ref
 
         while not exit_event.is_set() and len(Q) > 0:
