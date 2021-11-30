@@ -87,7 +87,7 @@ def main():
     hyperparameter_space = {"lr": lrs, "lambdas": lambdas}
     ray.init()
     analysis = tune.run(
-    tune_iris, 
+    train_model
     verbose=1, 
     config=hyperparameter_space,
     num_samples=num_samples)
