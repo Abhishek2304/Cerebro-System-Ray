@@ -76,8 +76,6 @@ def train_model(config):
         validation_data=(val_data, val_tar),
         verbose=0, batch_size=64, epochs=5, callbacks=callbacks)
 
-    return model
-
 def main():
 
     histories = []
