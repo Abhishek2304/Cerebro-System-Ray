@@ -46,7 +46,7 @@ class Worker(object):
     #         self.val_data = tf.convert_to_tensor(data_np)
     #         self.val_target = tf.convert_to_tensor(np.asarray(target))
     
-    def execute_subepoch(self, data, fn, is_train, initial_epoch):
+    def execute_subepoch(self, data_shard, fn, is_train, initial_epoch):
 
         # if is_train:
         #     data = self.train_data
