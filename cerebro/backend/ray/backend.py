@@ -271,7 +271,7 @@ class RayBackend(Backend):
                     if result_ref is not None:
                         result_refs[models[model_on_worker[j]].getRunId()].append(result_ref)
                     
-            exit_event.wait(self.settings.polling_period)
+            # exit_event.wait(self.settings.polling_period)
         
         for model_id in result_refs.keys():
             refs_this = result_refs[model_id]
