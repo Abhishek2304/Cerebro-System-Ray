@@ -93,9 +93,18 @@ class RayBackend(Backend):
         try:
             ray.init(address = "auto")
             print("Running on a Ray Cluster")
+            num_cpus = ray.available_resources()['CPU']
+            num_machines = 0
+            for key in ray.available_resources().keys():
+                if key[:5] == 'node:':
+                    num_machines += 1
+            num_machines = float(num_machines)
+            self.cpus_per_worker = num_cpus/num_machines
+            
         except ConnectionError:
             ray.init()
             print("No cluster found, running on a single Ray instance")
+            self.cpus_per_worker = 2
 
         tmout = timeout.Timeout(start_timeout,
                                 message='Timed out waiting for {activity}. Please check that you have '
@@ -134,14 +143,6 @@ class RayBackend(Backend):
         self.data_loaders_initialized = False
         self.train_shards = None
         self.val_shards = None
-        num_cpus = ray.available_resources()['CPU']
-        num_machines = 0
-        for key in ray.available_resources().keys():
-            if key[:5] == 'node:':
-                num_machines += 1
-        num_machines = float(num_machines)
-        
-        self.cpus_per_worker = num_cpus/num_machines
 
         # Add self.num_data_readers if it is different from num_workers
 
