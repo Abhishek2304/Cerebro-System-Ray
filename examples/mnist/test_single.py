@@ -1,0 +1,72 @@
+import tensorflow.keras as keras
+import tensorflow as tf
+import pandas as pd
+import numpy as np
+import time
+
+INPUT_SHAPE = (784, )
+NUM_CLASSES = 10
+SEED = 2021
+
+def define_model(lr, lambda_regularizer):        
+    
+    model = keras.models.Sequential()
+    model.add(keras.layers.Dense(1000, activation='relu',
+                                    input_shape=INPUT_SHAPE))
+    model.add(keras.layers.Dense(500, activation='relu'))
+    model.add(keras.layers.Dense(NUM_CLASSES, activation='softmax'))
+
+    regularizer = keras.regularizers.l2(lambda_regularizer)
+
+    for layer in model.layers:
+        for attr in ['kernel_regularizer', 'bias_regularizer']:
+            if hasattr(layer, attr):
+                setattr(layer, attr, regularizer)
+        for attr in ['kernel_initializer', 'bias_initializer']:
+            if hasattr(layer, attr):
+                layer_initializer = getattr(layer, attr)
+                if hasattr(layer_initializer, 'seed'):
+                    setattr(layer_initializer, 'seed', SEED)
+
+    optimizer = keras.optimizers.Adam(lr=lr)
+    loss = keras.losses.BinaryCrossentropy()
+    # loss = 'categorical_crossentropy'
+    metrics = ['acc']
+
+    return model, loss, optimizer, metrics
+
+
+def main():
+
+    histories = []
+    lrs = [1e-3, 1e-4]
+    lambdas = [1e-4, 1e-5]
+
+    train_df = pd.read_csv("/proj/orion-PG0/rayMnistDataset/mnist_train.csv", header=None)
+    train_tar = train_df.pop(0)
+    train_data = tf.convert_to_tensor(np.array(train_df))
+    train_tar = tf.one_hot(list(train_tar), NUM_CLASSES)
+
+    val_df = pd.read_csv("/proj/orion-PG0/rayMnistDataset/mnist_test.csv", header=None)
+    val_tar = val_df.pop(0)
+    val_data = tf.convert_to_tensor(np.array(val_df))
+    val_tar = tf.one_hot(list(val_tar), NUM_CLASSES)
+
+    for lr in lrs:
+        for lambda_regularizer in lambdas:
+
+            model, loss, optimizer, metrics = define_model(lr, lambda_regularizer)
+            model.compile(optimizer = optimizer, loss = loss, metrics = metrics)
+            history = model.fit(train_data, train_tar, batch_size=64, epochs=5, validation_data=(val_data, val_tar))
+
+            histories.append(history.history)
+
+    for history in histories:
+        print(history)
+
+if __name__ == "__main__":
+    
+    begin_time = time.time()
+    main()
+    print("Total time for sequential Keras:")
+    print(time.time() - begin_time)
