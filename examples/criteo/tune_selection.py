@@ -86,11 +86,17 @@ def main():
 
     hyperparameter_space = {"lr": tune.choice(lrs), "lambdas": tune.choice(lambdas)}
     ray.init()
+
+    begin_time = time.time()
     analysis = tune.run(
     train_model,
     verbose=1, 
     config=hyperparameter_space,
     num_samples=num_samples)
+    time_taken = time.time() - begin_time
+    
+    return time_taken
+
 
     # for lr in lrs:
     #     for lambda_regularizer in lambdas:
@@ -106,7 +112,6 @@ def main():
 
 if __name__ == "__main__":
     
-    begin_time = time.time()
-    main()
+    time_taken = main()
     print("Total time for Ray Tune:")
-    print(time.time() - begin_time)
+    print(time_taken)

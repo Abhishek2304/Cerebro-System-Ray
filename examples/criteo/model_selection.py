@@ -109,14 +109,19 @@ def main():
 
     model_selection = GridSearch(backend, store, estimator_gen_fn, param_grid_criteo, 5, evaluation_metric='acc',
                         feature_columns=['features'], label_columns=['label'], verbose = 1)
+
+    begin_time = time.time()
     model = model_selection.fit_on_prepared_data()
+    time_taken = time.time() - begin_time
+
+    return time_taken
     #print(model.get_all_model_history())
 
 if __name__ == "__main__":
-    begin_time = time.time()
-    main()
+    
+    time_taken = main()
     print("Time for Cerebro Ray:")
-    print(time.time() - begin_time)
+    print(time_taken)
 
 
 
