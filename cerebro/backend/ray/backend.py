@@ -249,7 +249,6 @@ class RayBackend(Backend):
                     model_idle[i] = False
                     worker_idle[j] = False
                     model_on_worker[j] = i
-                    print(sub_epoch_trainers[i])
                     if is_train:
                         result_ref = self.workers[j].execute_subepoch.remote(sub_epoch_trainers[i], is_train, models[i].epoch)
                     else:
