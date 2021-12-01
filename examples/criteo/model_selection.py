@@ -114,8 +114,9 @@ def main():
     model = model_selection.fit_on_prepared_data()
     time_taken = time.time() - begin_time
 
+    print(model.get_best_model_history())
+    
     return time_taken
-    #print(model.get_all_model_history())
 
 if __name__ == "__main__":
     
