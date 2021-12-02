@@ -43,12 +43,12 @@ def main():
     lambdas = [1e-4, 1e-5]
 
     train_df = pd.read_parquet("/proj/orion-PG0/rayMnistDataset/train_data.parquet")
-    train_tar = train_df.pop(0)
+    train_tar = train_df.pop('label')
     train_data = tf.convert_to_tensor(np.array(train_df))
     train_tar = tf.one_hot(list(train_tar), NUM_CLASSES)
 
     val_df = pd.read_parquet("/proj/orion-PG0/rayMnistDataset/val_data.parquet")
-    val_tar = val_df.pop(0)
+    val_tar = val_df.pop('label')
     val_data = tf.convert_to_tensor(np.array(val_df))
     val_tar = tf.one_hot(list(val_tar), NUM_CLASSES)
 
