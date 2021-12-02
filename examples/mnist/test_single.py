@@ -44,11 +44,12 @@ def main():
 
     train_df = pd.read_parquet("/proj/orion-PG0/rayMnistDataset/train_data.parquet")
     train_tar = train_df.pop('label')
-    # train_data = tf.convert_to_tensor(np.array(train_df))
-    print(train_df.head())
     train_data = np.array([arr.tolist() for arr in np.asarray(train_df)]).astype('float64')
     train_data = tf.convert_to_tensor(train_data)
     train_tar = tf.one_hot(list(train_tar), NUM_CLASSES)
+
+    print(train_data.shape)
+    raise NotImplementedError
 
     val_df = pd.read_parquet("/proj/orion-PG0/rayMnistDataset/val_data.parquet")
     val_tar = val_df.pop('label')
