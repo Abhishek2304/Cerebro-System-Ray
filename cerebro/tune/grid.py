@@ -218,7 +218,7 @@ def _fit_on_prepared_data(self, metadata):
     estimator_results = {model.getRunId(): {} for model in estimators}
 
     # log hyperparameters to TensorBoard
-    self._log_hp_to_tensorboard(estimators, self.estimator_param_maps)
+    # self._log_hp_to_tensorboard(estimators, self.estimator_param_maps)
 
     # Trains the models up to the number of epochs specified. For each iteration also performs validation
     for epoch in range(self.num_epochs):
@@ -230,7 +230,7 @@ def _fit_on_prepared_data(self, metadata):
                                                          self.label_cols, is_train=False)
         update_model_results(estimator_results, epoch_results)
 
-        self._log_epoch_metrics_to_tensorboard(estimators, estimator_results)
+        # self._log_epoch_metrics_to_tensorboard(estimators, estimator_results)
 
     # find the best model and crate ModelSearchModel
     models = [est.create_model(estimator_results[est.getRunId()], est.getRunId(), metadata) for est in estimators]
