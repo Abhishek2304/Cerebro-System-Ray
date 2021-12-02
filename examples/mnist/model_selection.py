@@ -41,7 +41,7 @@ def estimator_gen_fn(params): # lr, lambda_value
                     setattr(layer_initializer, 'seed', SEED)
 
     optimizer = keras.optimizers.Adam(lr=lr)
-    loss = keras.losses.CategoricalCrossentropy()
+    loss = keras.losses.SparseCategoricalCrossentropy()
 
     keras_estimator = RayEstimator(
         model=model,
@@ -82,12 +82,16 @@ def main():
 
     OUTPUT_PATH = "/proj/orion-PG0/rayMnistDataset/"
     data_dir = "/proj/orion-PG0/rayMnistDataset/mnist_train.csv"
+    val_dir = "/proj/orion-PG0/rayMnistDataset/mnist_test.csv"
+    
     header_list = ['label']
     for i in range(784):
         label = 'n' + str(i)
         header_list.append(label)
     
-    df = pd.read_csv(data_dir, names = header_list, header = None)
+    df1 = pd.read_csv(data_dir, names = header_list, header = None)
+    df2 = pd.read_csv(val_dir, names = header_list, header = None)
+    df = pd.concat([df1, df2])
     print("Reading Done")
 
     print("Preparing dataset")
@@ -101,6 +105,7 @@ def main():
         label = 'n' + str(i)
         df = df.drop(columns = [label])
 
+    print(df.head())
     print("STARTING BACKEND NOW")
     backend = RayBackend(num_workers = 4)
     store = LocalStore(OUTPUT_PATH, train_path=os.path.join(OUTPUT_PATH, 'train_data.parquet'), val_path=os.path.join(OUTPUT_PATH, 'val_data.parquet'))
