@@ -92,7 +92,8 @@ def main():
     
     df1 = pd.read_csv(data_dir, names = header_list, header = None)
     df2 = pd.read_csv(val_dir, names = header_list, header = None)
-    df = pd.concat([df1, df2])
+    df = pd.concat([df1, df2]*10).sort_index()
+    print(len(df))
     print("Reading Done")
 
     print("Preparing dataset")
@@ -110,8 +111,6 @@ def main():
     df_tar_one_hot = np.zeros((df_tar.size, df_tar.max()+1))
     df_tar_one_hot[np.arange(df_tar.size),df_tar] = 1
     df['label'] = df_tar_one_hot.tolist()
-
-    df = df.loc(df.index.repeat(10))
 
     print("STARTING BACKEND NOW")
     backend = RayBackend(num_workers = 4)
