@@ -46,20 +46,16 @@ def main():
     train_tar = train_df.pop('label')
     train_data = np.array([arr.tolist() for arr in np.asarray(train_df)]).astype('float64')
     train_data = tf.squeeze(tf.convert_to_tensor(train_data))
-    #train_tar = tf.one_hot(list(train_tar), NUM_CLASSES)
-    train_tar_one_hot = np.zeros((train_tar.size, train_tar.max()+1))
-    train_tar_one_hot[np.arange(train_tar.size),train_tar] = 1
-    train_tar = tf.convert_to_tensor(train_tar_one_hot)
+    tar_np = np.array([arr.tolist() for arr in np.asarray(train_tar)]).astype('float64')
+    train_tar = tf.convert_to_tensor(tar_np)
 
 
     val_df = pd.read_parquet("/proj/orion-PG0/rayMnistDataset/val_data.parquet")
     val_tar = val_df.pop('label')
     val_data = np.array([arr.tolist().pop() for arr in np.asarray(val_df)]).astype('float64')
     val_data = tf.squeeze(tf.convert_to_tensor(val_data))
-    #val_tar = tf.one_hot(list(val_tar), NUM_CLASSES)
-    val_tar_one_hot = np.zeros((val_tar.size, val_tar.max()+1))
-    val_tar_one_hot[np.arange(val_tar.size),val_tar] = 1
-    val_tar = tf.convert_to_tensor(val_tar_one_hot)
+    tar_np1 = np.array([arr.tolist() for arr in np.asarray(val_tar)]).astype('float64')
+    val_tar = tf.convert_to_tensor(tar_np1)    
 
     for lr in lrs:
         for lambda_regularizer in lambdas:

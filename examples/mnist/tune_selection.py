@@ -45,7 +45,7 @@ def define_model(lr, lambda_regularizer):
                     setattr(layer_initializer, 'seed', SEED)
 
     optimizer = keras.optimizers.Adam(lr=lr)
-    loss = keras.losses.BinaryCrossentropy()
+    loss = keras.losses.CategoricalCrossentropy()
     # loss = 'categorical_crossentropy'
     metrics = ['acc']
 
@@ -53,15 +53,19 @@ def define_model(lr, lambda_regularizer):
 
 def train_model(config):
 
-    train_df = pd.read_csv("/proj/orion-PG0/rayMnistDataset/mnist_train.csv", header=None)
-    train_tar = train_df.pop(0)
-    train_data = tf.convert_to_tensor(np.array(train_df))
-    train_tar = tf.one_hot(list(train_tar), NUM_CLASSES)
+    train_df = pd.read_parquet("/proj/orion-PG0/rayMnistDataset/train_data.parquet")
+    train_tar = train_df.pop('label')
+    train_data = np.array([arr.tolist() for arr in np.asarray(train_df)]).astype('float64')
+    train_data = tf.squeeze(tf.convert_to_tensor(train_data))
+    tar_np = np.array([arr.tolist() for arr in np.asarray(train_tar)]).astype('float64')
+    train_tar = tf.convert_to_tensor(tar_np)
 
-    val_df = pd.read_csv("/proj/orion-PG0/rayMnistDataset/mnist_test.csv", header=None)
-    val_tar = val_df.pop(0)
-    val_data = tf.convert_to_tensor(np.array(val_df))
-    val_tar = tf.one_hot(list(val_tar), NUM_CLASSES)
+    val_df = pd.read_parquet("/proj/orion-PG0/rayMnistDataset/val_data.parquet")
+    val_tar = val_df.pop('label')
+    val_data = np.array([arr.tolist().pop() for arr in np.asarray(val_df)]).astype('float64')
+    val_data = tf.squeeze(tf.convert_to_tensor(val_data))
+    tar_np1 = np.array([arr.tolist() for arr in np.asarray(val_tar)]).astype('float64')
+    val_tar = tf.convert_to_tensor(tar_np1)
 
     model, loss, optimizer, metrics = define_model(config["lr"], config["lambdas"])
 

@@ -278,17 +278,17 @@ class RayBackend(Backend):
                     
             # exit_event.wait(self.settings.polling_period)
         
-        # for model_id in result_refs.keys():
-        #     refs_this = result_refs[model_id]
-        #     for ref in refs_this:
-        #         result_this = ray.get(ref)
-        #         for k in result_this.keys():
-        #             if k in epoch_results[model_id]:
-        #                 epoch_results[model_id][k].extend(result_this[k])
-        #             else:
-        #                 epoch_results[model_id][k] = result_this[k]
-        #     for k in epoch_results[model_id]:
-        #         epoch_results[model_id][k] = np.average(epoch_results[model_id][k])
+        for model_id in result_refs.keys():
+            refs_this = result_refs[model_id]
+            for ref in refs_this:
+                result_this = ray.get(ref)
+                for k in result_this.keys():
+                    if k in epoch_results[model_id]:
+                        epoch_results[model_id][k].extend(result_this[k])
+                    else:
+                        epoch_results[model_id][k] = result_this[k]
+            for k in epoch_results[model_id]:
+                epoch_results[model_id][k] = np.average(epoch_results[model_id][k])
 
         if is_train:
             for model in models:
