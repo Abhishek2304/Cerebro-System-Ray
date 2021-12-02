@@ -185,7 +185,7 @@ class RayEstimator(CerebroEstimator):
 
         return model
     
-    def create_model(self, history, run_id, metadata):
+    def create_model(self, history, run_id, metadata = None):
         keras_utils = TFKerasUtil
         keras_module = keras_utils.keras()
         floatx = keras_module.backend.floatx()
@@ -204,14 +204,14 @@ class RayEstimator(CerebroEstimator):
     def get_model_class(self):
         return RayModel
 
-    def _get_model_kwargs(self, model, history, run_id, metadata, floatx):
+    def _get_model_kwargs(self, model, history, run_id, floatx, metadata = None):
         return dict(history=history,
                     model=model,
                     feature_columns=self.getFeatureCols(),
                     label_columns=self.getLabelCols(),
                     custom_objects=self.getCustomObjects(),
                     run_id=run_id,
-                    _metadata=metadata,
+                    _metadata = metadata,
                     _floatx=floatx)
     
     def _has_checkpoint(self, run_id):

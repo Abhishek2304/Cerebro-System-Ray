@@ -212,7 +212,7 @@ class HILRandomSearch(RandomSearch):
 
 
 # Batch implementation (i.e., without any user interaction) of model selection.
-def _fit_on_prepared_data(self, metadata):
+def _fit_on_prepared_data(self, metadata = None):
     # create estimators
     estimators = [self._estimator_gen_fn_wrapper(param) for param in self.estimator_param_maps]
     estimator_results = {model.getRunId(): {} for model in estimators}

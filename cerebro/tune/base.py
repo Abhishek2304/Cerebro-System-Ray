@@ -213,7 +213,7 @@ class ModelSelection(object):
 
         :return: cerebro.tune.ModelSelectionResult
         """
-        _, _, metadata, _ = self.backend.get_metadata_from_parquet(self.store, self.label_cols, self.feature_cols)
+        # _, _, metadata, _ = self.backend.get_metadata_from_parquet(self.store, self.label_cols, self.feature_cols)
 
         # initialize backend and data loaders
         if self.verbose >= 1: print(
@@ -228,7 +228,7 @@ class ModelSelection(object):
         try:
             if self.verbose >= 1: print('CEREBRO => Time: {}, Launching Model Selection Workload'.format(
                 datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-            result = self._fit_on_prepared_data(metadata)
+            result = self._fit_on_prepared_data(metadata = None)
             return result
         finally:
             # teardown the backend workers
