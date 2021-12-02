@@ -234,11 +234,6 @@ class RayBackend(Backend):
         
         Q = [(i, j) for i in range(len(models)) for j in range(self.settings.num_workers)]
         random.shuffle(Q)
-        # print()
-        # print()
-        # print(Q)
-        # print()
-        # print()
         model_idle = [True for _ in range(len(models))]
         worker_idle = [True for _ in range(self.settings.num_workers)]
         model_on_worker = [-1 for _ in range(self.settings.num_workers)]
@@ -303,12 +298,12 @@ class RayBackend(Backend):
 def _get_remote_trainer(estimator, store, dataset_idx, feature_columns, label_columns):
     run_id = estimator.getRunId()
     
-    _, _, metadata, _ = \
-        util.get_simple_meta_from_parquet(store,
-                                          schema_cols=label_columns + feature_columns,
-                                          dataset_idx=dataset_idx)
+    # _, _, metadata, _ = \
+    #     util.get_simple_meta_from_parquet(store,
+    #                                       schema_cols=label_columns + feature_columns,
+    #                                       dataset_idx=dataset_idx)
 
-    estimator._check_params(metadata)
+    # estimator._check_params(metadata)
     keras_utils = estimator._get_keras_utils()
 
     # Checkpointing the model if it does not exist.
