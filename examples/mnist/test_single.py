@@ -29,7 +29,7 @@ def define_model(lr, lambda_regularizer):
                     setattr(layer_initializer, 'seed', SEED)
 
     optimizer = keras.optimizers.Adam(lr=lr)
-    loss = keras.losses.BinaryCrossentropy()
+    loss = keras.losses.CategoricalCrossentropy()
     # loss = 'categorical_crossentropy'
     metrics = ['acc']
 
