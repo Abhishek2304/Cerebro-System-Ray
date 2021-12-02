@@ -39,12 +39,13 @@ class Worker(object):
         data_shard = data_shard.to_pandas(limit = data_shard.count())
         target = data_shard.pop('label')
         data_np = np.array([arr.tolist().pop() for arr in np.asarray(data_shard)]).astype('float64')
+        tar_np = np.array([arr.tolist().pop() for arr in np.asarray(target)]).astype('float64')
         if is_train:
             self.train_data = tf.convert_to_tensor(data_np)
-            self.train_target = tf.convert_to_tensor(np.asarray(target))
+            self.train_target = tf.convert_to_tensor(tar_np))
         else:
             self.val_data = tf.convert_to_tensor(data_np)
-            self.val_target = tf.convert_to_tensor(np.asarray(target))
+            self.val_target = tf.convert_to_tensor(tar_np)
     
     def execute_subepoch(self, fn, is_train, initial_epoch):
 
