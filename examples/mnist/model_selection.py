@@ -111,8 +111,6 @@ def main():
     df_tar_one_hot[np.arange(df_tar.size),df_tar] = 1
     df['label'] = df_tar_one_hot.tolist()
 
-    print(df.head())
-    raise NotImplementedError
     print("STARTING BACKEND NOW")
     backend = RayBackend(num_workers = 4)
     store = LocalStore(OUTPUT_PATH, train_path=os.path.join(OUTPUT_PATH, 'train_data.parquet'), val_path=os.path.join(OUTPUT_PATH, 'val_data.parquet'))
