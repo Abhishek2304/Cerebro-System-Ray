@@ -46,7 +46,10 @@ def main():
     train_tar = train_df.pop('label')
     train_data = np.array([arr.tolist() for arr in np.asarray(train_df)]).astype('float64')
     train_data = tf.squeeze(tf.convert_to_tensor(train_data))
-    train_tar = tf.one_hot(list(train_tar), NUM_CLASSES)
+    #train_tar = tf.one_hot(list(train_tar), NUM_CLASSES)
+    train_tar_one_hot = np.zeros((train_tar.size, train_tar.max()+1))
+    train_tar_one_hot[np.arange(train_tar.size),train_tar] = 1
+    train_tar = tf.convert_to_tensor(train_tar_one_hot)
 
     print(train_tar.shape)
     raise NotImplementedError
