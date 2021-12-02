@@ -48,7 +48,7 @@ def main():
     train_data = tf.squeeze(tf.convert_to_tensor(train_data))
     train_tar = tf.one_hot(list(train_tar), NUM_CLASSES)
 
-    print(train_data.shape)
+    print(train_tar.shape)
     raise NotImplementedError
 
     val_df = pd.read_parquet("/proj/orion-PG0/rayMnistDataset/val_data.parquet")
