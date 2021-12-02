@@ -40,29 +40,29 @@ def main():
 
     histories = []
     lrs = [1e-3, 1e-4]
-    lambdas = [1e-4, 1e-5]
-
-    train_df = pd.read_parquet("/proj/orion-PG0/rayMnistDataset/train_data.parquet")
-    train_tar = train_df.pop('label')
-    train_data = np.array([arr.tolist() for arr in np.asarray(train_df)]).astype('float64')
-    train_data = tf.squeeze(tf.convert_to_tensor(train_data))
-    tar_np = np.array([arr.tolist() for arr in np.asarray(train_tar)]).astype('float64')
-    train_tar = tf.convert_to_tensor(tar_np)
-
-
-    val_df = pd.read_parquet("/proj/orion-PG0/rayMnistDataset/val_data.parquet")
-    val_tar = val_df.pop('label')
-    val_data = np.array([arr.tolist().pop() for arr in np.asarray(val_df)]).astype('float64')
-    val_data = tf.squeeze(tf.convert_to_tensor(val_data))
-    tar_np1 = np.array([arr.tolist() for arr in np.asarray(val_tar)]).astype('float64')
-    val_tar = tf.convert_to_tensor(tar_np1)    
+    lambdas = [1e-4, 1e-5]    
 
     for lr in lrs:
         for lambda_regularizer in lambdas:
 
+            train_df = pd.read_parquet("/proj/orion-PG0/rayMnistDataset/train_data.parquet")
+            train_tar = train_df.pop('label')
+            train_data = np.array([arr.tolist() for arr in np.asarray(train_df)]).astype('float64')
+            train_data = tf.squeeze(tf.convert_to_tensor(train_data))
+            tar_np = np.array([arr.tolist() for arr in np.asarray(train_tar)]).astype('float64')
+            train_tar = tf.convert_to_tensor(tar_np)
+
+
+            val_df = pd.read_parquet("/proj/orion-PG0/rayMnistDataset/val_data.parquet")
+            val_tar = val_df.pop('label')
+            val_data = np.array([arr.tolist().pop() for arr in np.asarray(val_df)]).astype('float64')
+            val_data = tf.squeeze(tf.convert_to_tensor(val_data))
+            tar_np1 = np.array([arr.tolist() for arr in np.asarray(val_tar)]).astype('float64')
+            val_tar = tf.convert_to_tensor(tar_np1)
+
             model, loss, optimizer, metrics = define_model(lr, lambda_regularizer)
             model.compile(optimizer = optimizer, loss = loss, metrics = metrics)
-            history = model.fit(train_data, train_tar, batch_size=64, epochs=5, validation_data=(val_data, val_tar))
+            history = model.fit(train_data, train_tar, batch_size=16, epochs=5, validation_data=(val_data, val_tar))
 
             histories.append(history.history)
 
