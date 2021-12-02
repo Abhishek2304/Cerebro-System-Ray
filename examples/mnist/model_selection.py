@@ -84,8 +84,6 @@ def main():
     OUTPUT_PATH = "/proj/orion-PG0/rayMnistDataset/"
     data_dir = "/proj/orion-PG0/rayMnistDataset/mnist_train.csv"
     val_dir = "/proj/orion-PG0/rayMnistDataset/mnist_test.csv"
-
-    test.loc[test.index.repeat(test.times)]
     
     header_list = ['label']
     for i in range(784):
