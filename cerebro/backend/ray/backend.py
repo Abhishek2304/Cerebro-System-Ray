@@ -42,7 +42,7 @@ class Worker(object):
         tar_np = np.array([arr.tolist().pop() for arr in np.asarray(target)]).astype('float64')
         if is_train:
             self.train_data = tf.convert_to_tensor(data_np)
-            self.train_target = tf.convert_to_tensor(tar_np))
+            self.train_target = tf.convert_to_tensor(tar_np)
         else:
             self.val_data = tf.convert_to_tensor(data_np)
             self.val_target = tf.convert_to_tensor(tar_np)
