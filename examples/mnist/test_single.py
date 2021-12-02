@@ -45,14 +45,14 @@ def main():
     train_df = pd.read_parquet("/proj/orion-PG0/rayMnistDataset/train_data.parquet")
     train_tar = train_df.pop('label')
     # train_data = tf.convert_to_tensor(np.array(train_df))
-    print(train_tar.head())
-    train_data = np.array([arr.tolist() for arr in np.asarray(train_tar)]).astype('float64')
+    print(train_data.head())
+    train_data = np.array([arr.tolist() for arr in np.asarray(train_data)]).astype('float64')
     train_data = tf.convert_to_tensor(train_data)
     train_tar = tf.one_hot(list(train_tar), NUM_CLASSES)
 
     val_df = pd.read_parquet("/proj/orion-PG0/rayMnistDataset/val_data.parquet")
     val_tar = val_df.pop('label')
-    val_data = np.array([arr.tolist().pop() for arr in np.asarray(val_tar)]).astype('float64')
+    val_data = np.array([arr.tolist().pop() for arr in np.asarray(val_data)]).astype('float64')
     val_data = tf.convert_to_tensor(val_data)
     val_tar = tf.one_hot(list(val_tar), NUM_CLASSES)
 
