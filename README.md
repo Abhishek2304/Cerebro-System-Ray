@@ -33,8 +33,7 @@ For the implementation, we make changes to the following folders:
 
 **cerebro/backend**: We add another folder cerebro/backend/ray which contains the entire implementation of the Ray backend.
 **cerebro/keras**: We add another folder cerebro/keras/ray which contains the entire implementation of the Keras Estimator used by the Ray backend.
-**cerebro/examples**: We add 2 examples: **cerebro/examples/mnist** that runs the model on an augmented MNIST dataset 
-                                     **cerebro/examples/criteo** that runs the model on one partition of the Criteo dataset
+**cerebro/examples**: We add 2 examples: **cerebro/examples/mnist** that runs the model on an augmented MNIST dataset and **cerebro/examples/criteo** that runs the model on one partition of the Criteo dataset
 
 
 Examples
