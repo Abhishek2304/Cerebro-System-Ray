@@ -213,7 +213,8 @@ class ModelSelection(object):
 
         :return: cerebro.tune.ModelSelectionResult
         """
-       
+        # _, _, metadata, _ = self.backend.get_metadata_from_parquet(self.store, self.label_cols, self.feature_cols)
+
         # initialize backend and data loaders
         if self.verbose >= 1: print(
             'CEREBRO => Time: {}, Initializing Workers'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))

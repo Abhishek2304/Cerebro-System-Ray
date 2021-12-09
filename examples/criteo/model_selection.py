@@ -59,6 +59,8 @@ def estimator_gen_fn(params): # lr, lambda_value
 def main():
 
     # data_dir = "/proj/orion-PG0/rayCriteoDataset/valid_0.tsv"
+
+    # Replace this root folder with the folder where you place your data
     OUTPUT_PATH = "/proj/orion-PG0/rayCriteoDataset/"
     # TRAIN_FRACTION = 0.7
 
@@ -99,12 +101,13 @@ def main():
 
     print("STARTING BACKEND NOW")
     backend = RayBackend(num_workers = NUM_PARTITIONS)
+
+    # You can change train_data.parquet and val_data.parquet with your data files, but make sure they are parquet files.
     store = LocalStore(OUTPUT_PATH, train_path=os.path.join(OUTPUT_PATH, 'train_data.parquet'), val_path=os.path.join(OUTPUT_PATH, 'val_data.parquet'))
 
     param_grid_criteo = {
     "lr": hp_choice([1e-3, 1e-4]),
     "lambda_value": hp_choice([1e-4, 1e-5]),
-    # "batch_size": hp_choice([32, 64, 256, 512]),
     }
 
     model_selection = GridSearch(backend, store, estimator_gen_fn, param_grid_criteo, 5, evaluation_metric='acc',

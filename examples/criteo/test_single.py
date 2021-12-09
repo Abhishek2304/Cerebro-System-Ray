@@ -42,13 +42,13 @@ def main():
     lrs = [1e-3, 1e-4]
     lambdas = [1e-4, 1e-5]
 
-    train_df = pd.read_parquet("/proj/orion-PG0/rayCriteoDataset/train_data.parquet")
-    train_tar = train_df.pop('label')
-    np_train = np.array([arr.tolist().pop() for arr in np.asarray(train_df)]).astype('float64')
-    train_data = tf.convert_to_tensor(np_train)
-    train_tar = tf.convert_to_tensor(np.asarray(train_tar))
+    # train_df = pd.read_parquet("/proj/orion-PG0/rayCriteoDataset/train_0.parquet")
+    # train_tar = train_df.pop('label')
+    # np_train = np.array([arr.tolist().pop() for arr in np.asarray(train_df)]).astype('float64')
+    # train_data = tf.convert_to_tensor(np_train)
+    # train_tar = tf.convert_to_tensor(np.asarray(train_tar))
 
-    val_df = pd.read_parquet("/proj/orion-PG0/rayCriteoDataset/val_data.parquet")
+    val_df = pd.read_parquet("/proj/orion-PG0/rayCriteoDataset/valid_0.parquet")
     val_tar = val_df.pop('label')
     np_val = np.array([arr.tolist().pop() for arr in np.asarray(val_df)]).astype('float64')
     val_data = tf.convert_to_tensor(np_val)
@@ -59,7 +59,8 @@ def main():
 
             model, loss, optimizer, metrics = define_model(lr, lambda_regularizer)
             model.compile(optimizer = optimizer, loss = loss, metrics = metrics)
-            history = model.fit(train_data, train_tar, batch_size = 64, epochs = 5, validation_data = (val_data, val_tar))
+            history = model.fit(val_data, val_tar, batch_size = 64, epochs = 5)
+            # history = model.fit(train_data, train_tar, batch_size = 64, epochs = 5, validation_data = (val_data, val_tar))
 
             histories.append(history.history)
 
