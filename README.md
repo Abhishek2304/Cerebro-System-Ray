@@ -39,4 +39,5 @@ cerebro/examples: We add 2 examples: cerebro/examples/mnist that runs the model 
 
 Examples
 -------------
-We provide 2 detailed examples of Cerebro in the exam
+We provide 2 detailed examples of Cerebro in the examples folder: mnist and criteo (the deep postures and other scripts correspond to Spark)
+The details on running these examples is found in the READMEs of each such folder
