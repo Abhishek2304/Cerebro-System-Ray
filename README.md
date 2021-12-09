@@ -1,24 +1,24 @@
-Cerebro
-=======
+Cerebro On Ray
+==============
  
 ``Cerebro`` is a data system for optimized deep learning model selection. It uses a novel parallel execution strategy
 called **Model Hopper Parallelism (MOP)** to execute end-to-end deep learning model selection workloads in a more 
-resource-efficient manner. Detailed technical information about ``Cerebro`` can be found in our 
+resource-efficient manner. Detailed technical information about ``Cerebro`` can be found in the 
 [Technical Report](https://adalabucsd.github.io/papers/TR_2020_Cerebro.pdf).
 
 
 Install
 -------
 
-The best way to install the ``Cerebro`` is via pip.
+You can take the script from this repo called cloudlab_init.sh and run it in a bash shell
 
-    pip install -U cerebro-dl
+    bash cloudlab_init.sh
 
-Alternatively, you can git clone and run the provided Makefile script
+The script will install all dependencies (Linux and Python) and make a project directory in your current folder. It will clone and make the cerebro-system repo in this folder and install a Python virtual environment env_cerebro. You need to activate the environment to run the scripts. Go to the project folder and run:
 
-    git clone https://github.com/ADALabUCSD/cerebro-system.git && cd cerebro-system && make
+    source env_cerebro/bin/activate or activate.csh
 
-You MUST be running on **Python >= 3.6** with **Tensorflow >= 2.3** and **Apache Spark >= 2.4**
+You MUST be running on **Python >= 3.6** with **Tensorflow == 2.3** (The script should install the appropriate Python and tensorflow for you)
 
 
 Documentation
@@ -26,28 +26,17 @@ Documentation
 
 Detailed documentation about the system can be found [here](https://adalabucsd.github.io/cerebro-system/).
 
+Implementation
+--------------
 
-Acknowledgement
----------------
-This project was/is supported in part by a Hellman Fellowship, the NIDDK of the NIH under award number R01DK114945, and an NSF CAREER Award.
+For the implementation, we make changes to the following folders: 
 
-We used the following projects when building Cerebro.
-- [Horovod](https://github.com/horovod/horovod): Cerebro's Apache Spark implementation uses code from the Horovod's
- implementation for Apache Spark.
-- [Petastorm](https://github.com/uber/petastorm): We use Petastorm to read Apache Parquet data from remote storage
- (e.g., HDFS)  
- 
-Publications
-------------
-If you use this software for research, plase cite the following papers:
+cerebro/backend: We add another folder cerebro/backend/ray which contains the entire implementation of the Ray backend.
+cerebro/keras: We add another folder cerebro/keras/ray which contains the entire implementation of the Keras Estimator used by the Ray backend.
+cerebro/examples: We add 2 examples: cerebro/examples/mnist that runs the model on an augmented MNIST dataset 
+                                     cerebro/examples/criteo that runs the model on one partition of the Criteo dataset
 
-```latex
-@inproceedings{nakandala2019cerebro,
-  title={Cerebro: Efficient and Reproducible Model Selection on Deep Learning Systems},
-  author={Nakandala, Supun and Zhang, Yuhao and Kumar, Arun},
-  booktitle={Proceedings of the 3rd International Workshop on Data Management for End-to-End Machine Learning},
-  pages={1--4},
-  year={2019}
-}
 
-```
+Examples
+-------------
+We provide 2 detailed examples of Cerebro in the exam
