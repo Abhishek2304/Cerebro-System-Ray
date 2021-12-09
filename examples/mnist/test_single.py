@@ -62,7 +62,7 @@ def main():
 
             model, loss, optimizer, metrics = define_model(lr, lambda_regularizer)
             model.compile(optimizer = optimizer, loss = loss, metrics = metrics)
-            history = model.fit(train_data, train_tar, batch_size=16, epochs=5, validation_data=(val_data, val_tar))
+            history = model.fit(train_data, train_tar, batch_size=128, epochs=5, validation_data=(val_data, val_tar))
 
             histories.append(history.history)
 

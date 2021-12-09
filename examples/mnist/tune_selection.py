@@ -76,7 +76,7 @@ def train_model(config):
     model.fit(
         train_data, train_tar, 
         validation_data=(val_data, val_tar),
-        verbose=0, batch_size=64, epochs=5, callbacks=callbacks)
+        verbose=0, batch_size=128, epochs=5, callbacks=callbacks)
 
 def main():
 
