@@ -27,6 +27,7 @@ from ...backend import constants
 
 TF_KERAS = 'tf_keras'
 
+# Util functions needed for Ray borrowed from the Spark script.
 
 class TFKerasUtil(object):
     type = TF_KERAS

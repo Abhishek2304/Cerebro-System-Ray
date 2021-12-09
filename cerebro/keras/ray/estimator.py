@@ -12,12 +12,16 @@ LOCK = threading.Lock()
 MODEL_ID = -1
 
 def next_model_id():
+    """ Lock based id generator for models per process.
+    """
     global LOCK, MODEL_ID
     with LOCK:
         MODEL_ID += 1
         return MODEL_ID
 
 def _check_validation(validation):
+    """Checks if the provided validation ratio is valid
+    """
     if validation:
         if isinstance(validation, float):
             if validation < 0 or validation >= 1:
@@ -28,6 +32,9 @@ def _check_validation(validation):
                              .format(type(validation)))
 
 class RayEstimator(CerebroEstimator):
+    """ Ray implementation of Cerebro Estimator that stores all the characteristics of a single model. Analogous to Spark Estimator in the
+    Spark implementation
+    """
 
     def __init__(self,
                  model=None,
