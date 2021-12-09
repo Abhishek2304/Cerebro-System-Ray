@@ -99,19 +99,6 @@ def main():
     
     return time_taken
 
-
-    # for lr in lrs:
-    #     for lambda_regularizer in lambdas:
-
-    #         model, loss, optimizer, metrics = define_model(lr, lambda_regularizer)
-    #         model.compile(optimizer = optimizer, loss = loss, metrics = metrics)
-    #         history = model.fit(train_data, train_tar, batch_size = 64, epochs = 5, validation_data = (val_data, val_tar))
-
-    #         histories.append(history.history)
-
-    # for history in histories:
-    #     print(history)
-
 if __name__ == "__main__":
     
     time_taken = main()
