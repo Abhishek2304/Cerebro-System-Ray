@@ -29,7 +29,7 @@ def define_model(lr, lambda_regularizer):
                     setattr(layer_initializer, 'seed', SEED)
 
     optimizer = keras.optimizers.Adam(lr=lr)
-    loss = keras.losses.BinaryCrossentropy()
+    loss = keras.losses.CategoricalCrossentropy()
     # loss = 'categorical_crossentropy'
     metrics = ['acc']
 
@@ -59,7 +59,7 @@ def main():
 
             model, loss, optimizer, metrics = define_model(lr, lambda_regularizer)
             model.compile(optimizer = optimizer, loss = loss, metrics = metrics)
-            history = model.fit(val_data, val_tar, batch_size = 64, epochs = 5)
+            history = model.fit(val_data, val_tar, batch_size = 64, epochs = 5, validation_data = (val_data, val_tar))
             # history = model.fit(train_data, train_tar, batch_size = 64, epochs = 5, validation_data = (val_data, val_tar))
 
             histories.append(history.history)
