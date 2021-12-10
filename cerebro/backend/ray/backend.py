@@ -105,7 +105,7 @@ class RayBackend(Backend):
         except ConnectionError:
             ray.init()
             print("No cluster found, running on a single Ray instance")
-            self.cpus_per_worker = 2
+            self.cpus_per_worker = 4
 
         tmout = timeout.Timeout(start_timeout,
                                 message='Timed out waiting for {activity}. Please check that you have '
