@@ -29,6 +29,28 @@ def _check_validation(validation):
 
 class RayEstimator(CerebroEstimator):
 
+    """Cerebro Ray Estimator for fitting Keras model to a DataFrame.
+
+    Supports ``tf.keras >= 2.3``.
+
+    Args:
+        model: Keras model to train.
+        store: The object store storing train and val paths
+        epoch: The current epoch number that has been trained
+        batch_size: Batch size of the data
+        feature_cols/label_cols: The column names of the features/labels
+        custom_objects: Optional dictionary mapping names (strings) to custom classes or functions to be considered
+                        during serialization/deserialization.
+        optimizer: Keras optimizer.
+        loss: Keras loss or list of losses.
+        batch_size: Number of rows from the DataFrame per batch.
+        loss_weights: (Optional) List of float weight values to assign each loss.
+        metrics: (Optional) List of Keras metrics to record.
+        callbacks: (Optional) List of Keras callbacks.
+        transformation_fn: (Optional) Function that takes a TensorFlow Dataset as its parameter
+                       and returns a modified Dataset that is then fed into the
+                       train or validation step. This transformation is applied before batching.
+    """
     def __init__(self,
                  model=None,
                  store=None,
@@ -221,8 +243,16 @@ class RayEstimator(CerebroEstimator):
 
 
 class RayModel(CerebroModel):
-    """ Wrapper object containing a trained Keras model. Can be used for making predictions on a DataFrame.
+    """Ray Transformer wrapping a Keras model, used for making predictions on a DataFrame.
 
+    Args:
+        history: List of metrics, one entry per epoch during training.
+        model: Trained Keras model.
+        feature_columns: List of feature column names.
+        label_columns: List of label column names.
+        custom_objects: Keras custom objects.
+        metadata: The metadata of the underlying data the model is trained on
+        run_id: ID of the run used to train the model.
     """
 
     def __init__(self,

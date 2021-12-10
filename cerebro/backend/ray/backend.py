@@ -24,18 +24,21 @@ import ray
 import psutil
 import pandas as pd
 
-# Not specifying the number of CPUs in ray.remote (@ray.remote(num_cpus=1)) as we are doing a single core computation right now.
-# But may see if we want to specify it later or we dont want to keep it that dynamic. Also find a way to dynamically provide 
-# resources (num_cpus = 1 OR num_gpus = 1)
+### Ray actor class to define the workers that will keep the sharded data and perform the sub-epoch training
 @ray.remote
 class Worker(object):
     def __init__(self):
         self.completion_status = True
 
     def get_completion_status(self):
+        """ Tells master whether the current sub epoch has been executed
+        """
         return self.completion_status
     
     def accept_data(self, data_shard, is_train):
+        """ Takes data from the initialize_data_loaders() function, transforms it to make it loadable in keras
+            and stores the data
+        """
         data_shard = data_shard.to_pandas(limit = data_shard.count())
         target = data_shard.pop('label')
         data_np = np.array([arr.tolist().pop() for arr in np.asarray(data_shard)]).astype('float64')
@@ -48,6 +51,9 @@ class Worker(object):
             self.val_target = tf.convert_to_tensor(tar_np)
     
     def execute_subepoch(self, fn, is_train, initial_epoch):
+        """Takes the appropriate data shard and sends it to the train function to perform sub epoch training.
+            Sends results back to master
+        """
 
         if is_train:
             data = self.train_data
@@ -67,6 +73,8 @@ class Worker(object):
             print(str(e) + "\n" + traceback.format_exc())
 
     def testing_function(self, data):
+        """ Unimportant, testing function to verify workers are working as intended
+        """
         time.sleep(0.01)
         return ray._private.services.get_node_ip_address()
 
@@ -89,8 +97,11 @@ class RayBackend(Backend):
 
     def __init__(self, num_workers = None, start_timeout = 600, verbose = 1, 
                 data_readers_pool_type = 'thread'):
+        """ Initialization function. Connects to a ray cluster, assigns the required parameters and the 
+            number of resources per worker
+        """
 
-        # First try to detect cluster and connect to it. Else, run plain ray.init() for a single node.
+        # First try to detect cluster for multi-machine and connect to it. Else, run plain ray.init() for a single node.
         try:
             ray.init(address = "auto")
             print("Running on a Ray Cluster")
@@ -114,8 +125,6 @@ class RayBackend(Backend):
                                         'start_timeout parameter to a larger value if your Ray resources '
                                         'are allocated on-demand.')
         
-        # data_readers_pool_type specifies process or thread (for one/many nodes). May not need this as ray is automatic.
-        # Putting nics as none as we do not need to explicitly do TCP communication. Troubleshoot on nics and disk_cache_size_bytes.
         settings = ray_settings.Settings(verbose = verbose, 
                                         timeout = tmout,
                                         disk_cache_size_bytes = None,
@@ -123,7 +132,7 @@ class RayBackend(Backend):
                                         nics = None) 
 
         
-        # If num_workers not given, set the workers to approx cores/16.
+        # If num_workers not given, set the workers to the number of machines detected by Ray
         if num_workers is None:
             num_workers = 0
             for key in ray.available_resources().keys():
@@ -145,12 +154,15 @@ class RayBackend(Backend):
         self.train_shards = None
         self.val_shards = None
 
-        # Add self.num_data_readers if it is different from num_workers
-
     def _num_workers(self):
+        """ Helper function to get the number of workers.
+        """
         return self.settings.num_workers
 
     def initialize_workers(self):
+        """ Initializes the number of workers from self._num_workers() with a detached lifetime (infinite lifetime till shutdown)
+            and allocates the number of CPUs to each worker.
+        """
 
         num_workers = self._num_workers()
         print(self.cpus_per_worker)
@@ -159,7 +171,10 @@ class RayBackend(Backend):
         self.workers_initialized = True
 
     def initialize_data_loaders(self, store, schema_Fields=None, dataset_idx=None):
-        ### Assume data is in parquet format in train/val_data_path Initialize data loaders to read this parquet format and shard automatically
+        """ Assumes that the train/val data is loaded in the local store in parquet format
+            Splits both the data across the workers.
+            initialize_workers needs to be called before calling this function
+        """
 
         if self.workers_initialized:
             shard_count = self._num_workers()
@@ -178,35 +193,39 @@ class RayBackend(Backend):
             raise Exception('Ray tasks not initialized for Cerebro. Please run RayBackend.initialize_workers() first!')
 
     def teardown_workers(self):
-        # Need to reimplement, probably not related to killing of the workers.
+        """ Final call for killing all the respective workers and shutting down the ray cluster
+        """
         
-        # Consider, instead of forcefully killing it, to remove the detached lifetime and set it to null.
-        # Hence, when all references to actor handle are removed, it is automatically garbage collected
-        # and the process is stopped.
-        
-        # Consider explicitly shutting down ray here, but before that make sure that all data is 
-        # written to persistent storage
-
-        # Simply shutting down ray right now, may have to do more later
         ray.shutdown()
 
     def prepare_data(self, store, dataset, validation, num_partitions=None, parquet_row_group_size_mb=8, dataset_idx=None):
+        """ This function is called by the main script if the data is provided as a single dataframe. Calls the
+            relevant function to load the data, split it into train-val sets and save it as parquet files from where
+            it can be picked up for sharding to dataloaders.
+        """
         # IMP - Takes the number of partitions as equal to the number of workers here. DOES NOT USE THE num_partitions SUPPLIED.
         return util.prepare_data(self._num_workers(), store, dataset, validation, 
                             num_partitions=self._num_workers(), dataset_idx=dataset_idx, 
                             parquet_row_group_size_mb = parquet_row_group_size_mb, verbose = self.settings.verbose)
                             
     def get_metadata_from_parquet(self, store, label_columns=['label'], feature_columns=['features'], dataset_idx = None):
+        """ Helper function to get metadata of stored data from parquet
+        """
         return util.get_simple_meta_from_parquet(store, label_columns + feature_columns, dataset_idx = dataset_idx)
 
     def train_for_one_epoch(self, models, store, feature_cols, label_cols, is_train=True):
-        
+        """
+        Takes a set of Keras models and trains for one epoch. If is_train is False, validation is performed
+        instead of training.
+        """
+
         mode = "Training"
         if not is_train:
             mode = "Validation"
         if self.settings.verbose >= 1:
             print('CEREBRO => Time: {}, Starting EPOCH {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), mode))
         
+        # First get the data and send it to _get_remote_trainer to get the trainers for each model
         sub_epoch_trainers = []
         epoch_results = {}
         result_refs = {}
@@ -231,7 +250,7 @@ class RayBackend(Backend):
             
             sub_epoch_trainers.append(_get_remote_trainer(model, a_store, None, a_feature_col, a_label_col))
 
-        
+        # Make a queue and the model and worker availability lists for the scheduling
         Q = [(i, j) for i in range(len(models)) for j in range(self.settings.num_workers)]
         random.shuffle(Q)
         model_idle = [True for _ in range(len(models))]
@@ -239,6 +258,8 @@ class RayBackend(Backend):
         model_on_worker = [-1 for _ in range(self.settings.num_workers)]
 
         def place_model_on_worker(j):
+            ### Checks which model from the model-worker pairs for worker j is idle and assigns model to that worker.
+            ### Calls the execute subepoch function for that worker and gets the result Object reference, returns it.
             for idx, s in enumerate(Q):
                 i, j_prime = s
                 if j_prime == j and model_idle[i]:
@@ -251,6 +272,8 @@ class RayBackend(Backend):
                         result_ref = self.workers[j].execute_subepoch.remote(sub_epoch_trainers[i], is_train, models[i].epoch)
                     return result_ref
 
+        ### Till the queue is not empty/exit event is not called, keep assigning idle models to idle workers using place_model_on_worker
+        ### Append the subepoch result object references for each model to their dictionary result_refs
         while not exit_event.is_set() and len(Q) > 0:
             for j in range(self.settings.num_workers):
                 if worker_idle[j]:
@@ -261,9 +284,7 @@ class RayBackend(Backend):
                 elif ray.get(self.workers[j].get_completion_status.remote()):
                     i = model_on_worker[j]
                     Q.remove((i, j))
-                    # print()
-                    # print(Q)
-                    # print()
+                    
                     model_idle[i] = True
                     worker_idle[j] = True
                     model_on_worker[j] = -1
@@ -271,8 +292,8 @@ class RayBackend(Backend):
                     if result_ref is not None:
                         result_refs[models[model_on_worker[j]].getRunId()].append(result_ref)
                     
-            # exit_event.wait(self.settings.polling_period)
-        
+        ### Iterate over the subepoch result object references of each model, get the results (loss, acc etc.) Average them out
+        ### and return these statistics as epoch results to be used by the callee tune functions
         for model_id in result_refs.keys():
             refs_this = result_refs[model_id]
             for ref in refs_this:
@@ -284,7 +305,8 @@ class RayBackend(Backend):
                         epoch_results[model_id][k] = result_this[k]
             for k in epoch_results[model_id]:
                 epoch_results[model_id][k] = np.average(epoch_results[model_id][k])
-
+        
+        ### If training, increment the epoch number of each model
         if is_train:
             for model in models:
                 if model.getEpochs() is None:
@@ -296,18 +318,15 @@ class RayBackend(Backend):
 
 
 def _get_remote_trainer(estimator, store, dataset_idx, feature_columns, label_columns):
-    run_id = estimator.getRunId()
+    """ Function to load the required values from Ray Estimator, compile and checkpoint the initial model
+        and return the trainer that can be sent to the Ray workers by master
+    """
     
-    # _, _, metadata, _ = \
-    #     util.get_simple_meta_from_parquet(store,
-    #                                       schema_cols=label_columns + feature_columns,
-    #                                       dataset_idx=dataset_idx)
-
-    # estimator._check_params(metadata)
+    run_id = estimator.getRunId()
     keras_utils = estimator._get_keras_utils()
 
     # Checkpointing the model if it does not exist.
-    if not estimator._has_checkpoint(run_id): # TODO: Check if you need to use the Ray store instead (WHOLE BLOCK)
+    if not estimator._has_checkpoint(run_id): 
         remote_store = store.to_remote(run_id, dataset_idx) 
 
         with remote_store.get_local_output_dir() as run_output_dir:
@@ -315,10 +334,15 @@ def _get_remote_trainer(estimator, store, dataset_idx, feature_columns, label_co
             ckpt_file = os.path.join(run_output_dir, remote_store.checkpoint_filename)
             model.save(ckpt_file)
             remote_store.sync(run_output_dir)
+
     return sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx)
 
 
 def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
+    """ Trainer keeping the required values for each estimator object for model loading, checkpointing etc.
+        Returns the subepoch training function (train() - defined below) that can be called by the workers
+    """ 
+
     # Estimator parameters
     user_callbacks = estimator.callbacks
     custom_objects = estimator.custom_objects
@@ -330,14 +354,15 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
     eval_sub_epoch_fn = keras_utils.eval_sub_epoch_fn()
 
     # Utility functions
-    deserialize_keras_model = _deserialize_keras_model_fn() #TODO: If implementing ray store, do we need this function?
+    deserialize_keras_model = _deserialize_keras_model_fn()
     pin_gpu = _pin_gpu_fn() 
 
     # Storage
-    store = estimator.store # TODO:Check if you need to use the Ray store instead
-    remote_store = store.to_remote(run_id, dataset_idx) # TODO: Check if you need to use the Ray store instead
+    store = estimator.store
+    remote_store = store.to_remote(run_id, dataset_idx)
 
     def train(x_data, y_data, is_train, starting_epoch, local_task_index=0):
+        ### Subepoch training function
 
         begin_time = time.time()
 
@@ -356,13 +381,13 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
         verbose = user_verbose
 
         with remote_store.get_local_output_dir() as run_output_dir:
-            step_counter_callback = KerasStepCounter() # Is it making a new Step Counter everytime, so the counter is always 1?
+            step_counter_callback = KerasStepCounter() 
             callbacks = [step_counter_callback]
             if user_callbacks is not None:
                 callbacks = callbacks + user_callbacks
-            ckpt_file = os.path.join(run_output_dir, remote_store.checkpoint_filename) ## TODO: Check if using Ray store instead of physical store.
-            # print(ckpt_file)
-            # restoring the model from the previous checkpoint #TODO: Check what to do for Ray Store
+            ckpt_file = os.path.join(run_output_dir, remote_store.checkpoint_filename)
+      
+            # restoring the model from the previous checkpoint
             # with tf.keras.utils.custom_object_scope(custom_objects):
             #     model = deserialize_keras_model(
             #         remote_store.get_last_checkpoint(), lambda x: tf.keras.models.load_model(x))
@@ -381,14 +406,16 @@ def sub_epoch_trainer(estimator, keras_utils, run_id, dataset_idx):
                 starting_epoch = 0
 
             if is_train:
+                ### Load the model from checkpoing train and save
                 initialization_time = time.time() - begin_time
                 begin_time = time.time()
                 result = fit_sub_epoch_fn(starting_epoch, model, x_data, y_data, callbacks, verbose).history
                 training_time = time.time() - begin_time
                 begin_time = time.time()
                 result = {'train_' + name: result[name] for name in result}
-                model.save(ckpt_file) # TODO: Check how to work with Ray store, passing to and from checkpoint, and a final saving of model.
+                model.save(ckpt_file)
             else:
+                ### Load the model from checkpoint and validate
                 initialization_time = time.time() - begin_time
                 begin_time = time.time()
                 result = eval_sub_epoch_fn(starting_epoch, model, x_data, y_data, callbacks, verbose)

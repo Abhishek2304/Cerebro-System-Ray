@@ -8,7 +8,8 @@ import pandas as pd
 from .. import constants
 
 def get_simple_meta_from_parquet(store, schema_cols, dataset_idx=None):
-    # We dont get avg_row size as its not needed for Ray. Thus, return None for that always.
+    """ Gets metadata from the parquet train/val files
+    """ 
 
     train_data_path = store.get_train_data_path(dataset_idx)
     validation_data_path = store.get_val_data_path(dataset_idx)
@@ -34,7 +35,8 @@ def get_simple_meta_from_parquet(store, schema_cols, dataset_idx=None):
     return train_rows, val_rows, metadata, avg_row_size
 
 def _train_val_split(df, validation):
-    
+    """ Splits the dataframe into the train and val data according to ratio provided
+    """
     validation_ratio = 0.0
 
     if isinstance(validation, float) and validation > 0:
@@ -66,7 +68,9 @@ def _train_val_split(df, validation):
 
 def _create_dataset(store, df, validation, compress_sparse,
                     num_partitions, num_workers, dataset_idx, parquet_row_group_size_mb, verbose):
-    # We dont get avg_row size as its not needed for ray. Thus, return None for that always.
+    """ Creates the train/val set from the dataframe provided, does some validation and saves it
+        as parquet files to the given paths
+    """
 
     train_data_path = store.get_train_data_path(dataset_idx)
     val_data_path = store.get_val_data_path(dataset_idx)
@@ -116,6 +120,8 @@ def _create_dataset(store, df, validation, compress_sparse,
     
 
 def check_validation(validation, df = None):
+    """ Check if the given validation value is legal
+    """
     if validation:
         if isinstance(validation, float):
             if validation < 0 or validation >= 1:
@@ -132,7 +138,8 @@ def check_validation(validation, df = None):
 def prepare_data(num_workers, store, df,
                  validation=None, compress_sparse=False,
                  num_partitions=None, parquet_row_group_size_mb=8, dataset_idx=None, verbose=0):
-    
+    """ Checks validation and sends the dataframe to the create dataset function
+    """
     check_validation(validation, df=df)
     if num_workers <= 0:
         raise ValueError('num_workers={} must be > 0'

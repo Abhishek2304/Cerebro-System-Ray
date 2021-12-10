@@ -27,6 +27,7 @@ from ...backend import constants
 
 TF_KERAS = 'tf_keras'
 
+# Util functions needed for Ray estimator copied from the keras spark implementation
 
 class TFKerasUtil(object):
     type = TF_KERAS
