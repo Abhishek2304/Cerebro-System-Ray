@@ -13,6 +13,7 @@ from cerebro.tune import RandomSearch, GridSearch, hp_choice
 import random
 random.seed(2021)
 
+# Change the model/loss/optimizer definitions in this function.
 def estimator_gen_fn(params): # params used: lr, lambda_value (for regularization)
 
     lr = params["lr"]
@@ -66,7 +67,8 @@ def main():
     # You can change train_data.parquet and val_data.parquet with your data files, but make sure they are parquet files.
     store = LocalStore(OUTPUT_PATH, train_path=os.path.join(OUTPUT_PATH, 'train_data.parquet'), \
         val_path=os.path.join(OUTPUT_PATH, 'val_data.parquet'))
-
+    
+    # You can change the hyperparameter search space over here.
     param_grid_criteo = {
         "lr": hp_choice([1e-3, 1e-4]),
         "lambda_value": hp_choice([1e-4, 1e-5]),
