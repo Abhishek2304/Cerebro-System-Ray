@@ -20,3 +20,5 @@ We provide an example of how to use `Cerebro-Ray` to scale the model selection o
    `ray start --address=<address_name> --redis-password=<redis_password>`
    Copy this command and run it on all machines you want the Ray cluster on.
    Then run the script on the master node by running the command `python3 model_selection.py`.
+   
+5. The other scripts `test_single.py` and `tune_selection.py` are for comparing our approach to a sequential approach and Ray Tune.
