@@ -31,8 +31,8 @@ Implementation
 
 For our implementation of the Ray backend, the source codes can be found in the following folders: 
 
-**cerebro/backend**: We add another folder cerebro/backend/ray which contains the entire implementation of the Ray backend.
-**cerebro/keras**: We add another folder cerebro/keras/ray which contains the entire implementation of the Keras Estimator used by the Ray backend.
+**cerebro/backend**: We add another folder cerebro/backend/ray which contains the entire implementation of the Ray backend. \
+**cerebro/keras**: We add another folder cerebro/keras/ray which contains the entire implementation of the Keras Estimator used by the Ray backend. \
 **cerebro/examples**: We add 1 example: **cerebro/examples/mnist** that runs the model on an augmented MNIST dataset.
 
 Examples
