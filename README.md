@@ -1,5 +1,5 @@
-Cerebro On Ray
-==============
+Ray Backend for Cerebro
+=======================
  
 ``Cerebro`` is a data system for optimized deep learning model selection. It uses a novel parallel execution strategy
 called **Model Hopper Parallelism (MOP)** to execute end-to-end deep learning model selection workloads in a more 
