@@ -29,7 +29,7 @@ Detailed documentation about the system can be found [here](https://adalabucsd.g
 Implementation
 --------------
 
-For the implementation, we make changes to the following folders: 
+For our implementation of the Ray backend, the source codes can be found in the following folders: 
 
 **cerebro/backend**: We add another folder cerebro/backend/ray which contains the entire implementation of the Ray backend.
 **cerebro/keras**: We add another folder cerebro/keras/ray which contains the entire implementation of the Keras Estimator used by the Ray backend.
@@ -37,5 +37,5 @@ For the implementation, we make changes to the following folders:
 
 Examples
 -------------
-We provide a detailed examples of Cerebro in the examples folder: mnist (the deep postures and other scripts correspond to Spark).
+We provide a detailed examples of running our implementation of Ray on a large augmented MNIST dataset and comparing with Sequential Keras and Ray Tune in the examples folder: mnist (the deep postures and other scripts correspond to Spark).
 The details on running this example is found in the README of the folder.
