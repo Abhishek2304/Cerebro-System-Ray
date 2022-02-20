@@ -4,7 +4,8 @@ Cerebro On Ray
 ``Cerebro`` is a data system for optimized deep learning model selection. It uses a novel parallel execution strategy
 called **Model Hopper Parallelism (MOP)** to execute end-to-end deep learning model selection workloads in a more 
 resource-efficient manner. Detailed technical information about ``Cerebro`` can be found in the 
-[Technical Report](https://adalabucsd.github.io/papers/TR_2020_Cerebro.pdf).
+[Technical Report](https://adalabucsd.github.io/papers/TR_2020_Cerebro.pdf). \\
+We present a backend of this system deployed on Python's scalable systems library: Ray.
 
 
 Install
